@@ -1,19 +1,22 @@
-# AWS DevOps Engineer services metaphors simulations
+# AWS DevOps Engineer -- Services Metaphors Simulations
 
 ## 📌 What is this?
 
-This HTML is a **simple interactive dashboard UI** to learn AWS DevOps services.
+A **simple interactive HTML dashboard** to learn AWS DevOps services.
 
-- Left side = menu (list of AWS services)
-- Right side = content area (changes when you click)
+-   Left = list of services
+-   Right = explanation (changes when clicked)
 
----
+------------------------------------------------------------------------
 
-## How to Use
+## 🚀 How to Use
 
-Open the `pizza.html` file in your web browser to start using the app.
+Open one of these files in your browser:
 
----
+-   `pizza.html` → learn using a pizza shop
+-   `hospital.html` → learn using a hospital
+
+------------------------------------------------------------------------
 
 ## Samples
 
@@ -26,64 +29,74 @@ Open the `pizza.html` file in your web browser to start using the app.
 <img width="3420" height="1816" alt="AWS-DevOps-Engineer-services-metaphors-simulations-04-06-2026_05_40_PM (2)" src="https://github.com/user-attachments/assets/c1543a23-c21f-4624-b262-f4cff7aff09d" />
 
 
-
 ---
+## 🍕 pizza.html (Simple & Fun)
 
+Learn DevOps like running a pizza shop.
+
+-   **CodePipeline** → order flow (order → cook → serve)
+-   **CodeBuild** → cooking pizza
+-   **CodeDeploy** → delivering pizza
+-   **CloudWatch** → kitchen monitor
+-   **IAM** → staff roles
+-   **S3** → storage
+
+👉 Best for understanding **flow and speed**
+
+------------------------------------------------------------------------
+
+## 🏥 hospital.html (Clear & Realistic)
+
+Learn DevOps like treating patients in a hospital.
+
+-   **CodePipeline** → patient journey (check → treat → discharge)
+-   **CodeDeploy** → move patients safely (small test first)
+-   **X-Ray** → scan to find problems
+-   **CloudTrail** → audit logs / CCTV
+-   **IAM** → rules & permissions
+-   **S3** → medical records storage
+
+👉 Best for understanding **safety and reliability**
+
+------------------------------------------------------------------------
 
 ## 🧠 Categories
 
-Services are grouped into sections:
-
 ### CI/CD
-- CodePipeline
-- CodeBuild
-- CodeDeploy
-- CodeCommit
-- CodeArtifact
-- Elastic Beanstalk
 
-### Infrastructure as Code
-- CloudFormation
-- CDK
-- Systems Manager
+CodePipeline, CodeBuild, CodeDeploy, CodeCommit, CodeArtifact, Elastic
+Beanstalk
+
+### Infrastructure
+
+CloudFormation, CDK, Systems Manager
 
 ### Compute
-- ECS
-- EKS
-- Lambda
-- Auto Scaling
+
+ECS, EKS, Lambda, Auto Scaling
 
 ### Monitoring
-- CloudWatch
-- X-Ray
-- EventBridge
+
+CloudWatch, X-Ray, EventBridge
 
 ### Governance
-- Config
-- CloudTrail
-- IAM
+
+Config, CloudTrail, IAM
 
 ### Networking
-- Route 53
-- ELB
-- SQS
-- SNS
-- S3
 
----
+Route 53, ELB, SQS, SNS, S3
 
-## 🎯 Purpose of This Code
+------------------------------------------------------------------------
 
-This UI is designed to:
+## 🎯 Purpose
 
-- Help you **learn AWS services**
-- Use **real-world analogy**
-- Simulate DevOps flow
+-   Learn AWS faster
+-   Use simple real-life examples
+-   Understand DevOps flow
 
----
+------------------------------------------------------------------------
 
 ## ⚡ One-Line Summary
 
 > This is a **clickable learning dashboard** for AWS services using simple HTML + JavaScript.
-
----
