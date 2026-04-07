@@ -20,13 +20,10 @@ Open one of these files in your browser:
 
 ## Samples
 
-<img width="3420" height="1870" alt="AWS-DevOps-Engineer-25-services-metaphors-simulations-04-06-2026_05_38_PM" src="https://github.com/user-attachments/assets/b120b22d-174b-408e-b055-d7601247302e" />
-<img width="3420" height="2140" alt="AWS-DevOps-Engineer-25-services-metaphors-simulations-04-06-2026_05_38_PM (1)" src="https://github.com/user-attachments/assets/23fa8158-c60b-43dd-bf13-5dc07d536fca" />
-<img width="3420" height="1816" alt="AWS-DevOps-Engineer-25-services-metaphors-simulations-04-06-2026_05_39_PM" src="https://github.com/user-attachments/assets/bb8fa43f-e21d-4b21-851f-a4b5814196c6" />
-<img width="3420" height="1816" alt="AWS-DevOps-Engineer-25-services-metaphors-simulations-04-06-2026_05_39_PM (1)" src="https://github.com/user-attachments/assets/91d515af-688f-4c65-a986-e30829bee713" />
-<img width="3420" height="1816" alt="AWS-DevOps-Engineer-25-services-metaphors-simulations-04-06-2026_05_40_PM" src="https://github.com/user-attachments/assets/c91c95b5-a99b-4f7c-8f8e-63d202987f73" />
-<img width="3420" height="1816" alt="AWS-DevOps-Engineer-25-services-metaphors-simulations-04-06-2026_05_40_PM (1)" src="https://github.com/user-attachments/assets/798b6c3a-b3f5-4c46-a94a-6375cc028702" />
-<img width="3420" height="1816" alt="AWS-DevOps-Engineer-25-services-metaphors-simulations-04-06-2026_05_40_PM (2)" src="https://github.com/user-attachments/assets/18904652-2bd8-4074-8b8a-349551f4a99c" />
+<img width="2398" height="1825" alt="AWS-DevOps-Engineer-Services-Metaphors-Simulations-Using-Hospital-ER-04-07-2026_02_24_PM" src="https://github.com/user-attachments/assets/69efedd7-b8c6-4114-ba19-1ccfff46f975" />
+
+<img width="2400" height="1831" alt="AWS-DevOps-Engineer-Services-Metaphors-Simulations-Using-Pizza-Restaurants-04-07-2026_02_25_PM" src="https://github.com/user-attachments/assets/596be75d-0915-45ed-a587-7a3621d297d5" />
+
 
 ---
 ## 🍕 pizza.html (Simple & Fun)
