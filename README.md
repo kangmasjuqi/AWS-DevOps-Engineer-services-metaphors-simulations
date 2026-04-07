@@ -72,46 +72,13 @@ Services are grouped into sections:
 
 ---
 
-## ⚙️ How Interaction Works
-
-Each button:
-
-```
-onclick="show('something')"
-```
-
-👉 Means:
-- There must be a JavaScript function like:
-
-```
-function show(section) {
-  document.getElementById("main-area").innerHTML = ...
-}
-```
-
-👉 It changes the content inside:
-
-```
-<div id="main-area"></div>
-```
-
----
-
 ## 🎯 Purpose of This Code
 
 This UI is designed to:
 
 - Help you **learn AWS services**
-- Use **real-world analogy (pizza restaurant)**
+- Use **real-world analogy**
 - Simulate DevOps flow
-
----
-
-## 🧠 Simple Mental Model
-
-- Sidebar = **menu of topics**
-- Main area = **lesson content**
-- Button click = **switch lesson**
 
 ---
 
@@ -120,22 +87,3 @@ This UI is designed to:
 > This is a **clickable learning dashboard** for AWS services using simple HTML + JavaScript.
 
 ---
-
-## 🚀 Optional Improvements
-
-If you want to improve:
-
-- Add real JavaScript `show()` logic
-- Add animations
-- Use React instead of plain HTML
-- Load content dynamically (API or JSON)
-
----
-
-## ✅ Done
-
-You now understand:
-- Layout
-- Buttons
-- Interaction flow
-
