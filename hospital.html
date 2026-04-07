@@ -1,0 +1,1378 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AWS DevOps Engineer - Services, Metaphors & Simulations Using Hospital & ER</title>
+<style>
+:root {
+  --color-background-primary: light-dark(rgba(255,255,255,1), rgba(28,32,36,1));
+  --color-background-secondary: light-dark(rgba(245,247,250,1), rgba(36,40,46,1));
+  --color-background-tertiary: light-dark(rgba(238,242,247,1), rgba(20,23,28,1));
+  --color-background-info: light-dark(rgba(214,228,246,1), rgba(37,62,95,1));
+  --color-background-danger: light-dark(rgba(247,236,236,1), rgba(96,42,40,1));
+  --color-background-success: light-dark(rgba(233,241,220,1), rgba(27,70,20,1));
+  --color-background-warning: light-dark(rgba(246,238,223,1), rgba(72,58,15,1));
+  --color-text-primary: light-dark(rgba(20,20,19,1), rgba(240,242,245,1));
+  --color-text-secondary: light-dark(rgba(61,61,58,1), rgba(180,186,196,1));
+  --color-text-tertiary: light-dark(rgba(115,114,108,1), rgba(120,126,136,1));
+  --color-text-info: light-dark(rgba(50,102,173,1), rgba(128,170,221,1));
+  --color-text-danger: light-dark(rgba(127,44,40,1), rgba(238,136,132,1));
+  --color-text-success: light-dark(rgba(38,91,25,1), rgba(122,185,72,1));
+  --color-text-warning: light-dark(rgba(90,72,21,1), rgba(209,160,65,1));
+  --color-border-primary: light-dark(rgba(31,30,29,0.4), rgba(200,206,216,0.25));
+  --color-border-secondary: light-dark(rgba(31,30,29,0.25), rgba(200,206,216,0.18));
+  --color-border-tertiary: light-dark(rgba(31,30,29,0.12), rgba(200,206,216,0.1));
+  --color-border-info: light-dark(rgba(70,130,213,1), rgba(70,130,213,1));
+  --color-border-success: light-dark(rgba(67,116,38,1), rgba(89,145,48,1));
+  --color-border-warning: light-dark(rgba(128,92,31,1), rgba(168,120,41,1));
+  --color-border-danger: light-dark(rgba(167,61,57,1), rgba(205,92,88,1));
+  --border-radius-md: 8px;
+  --border-radius-lg: 12px;
+  --font-mono: 'Courier New', monospace;
+
+  /* Hospital brand colours */
+  --er-red: #C0392B;
+  --er-red-light: #FDEDEC;
+  --er-red-mid: #E74C3C;
+  --er-blue: #1A5276;
+  --er-blue-light: #D6EAF8;
+  --er-teal: #0E6655;
+  --er-teal-light: #D1F2EB;
+  --er-amber: #784212;
+  --er-amber-light: #FDEBD0;
+  --er-purple: #4A235A;
+  --er-purple-light: #E8DAEF;
+  --er-coral: #922B21;
+  --er-coral-light: #FADBD8;
+  --er-green: #1E8449;
+  --er-green-light: #D5F5E3;
+}
+
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Segoe UI',system-ui,sans-serif;font-size:15px;color:var(--color-text-primary);background:var(--color-background-tertiary);}
+
+/* ── HEADER ── */
+.header{
+  max-width: 1200px;
+  margin: 0px auto;
+  background:var(--color-background-primary);
+  border-bottom:1px solid var(--color-border-tertiary);
+  padding:14px 24px;
+  display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;
+  position:sticky;top:0;z-index:100;
+}
+.header-left{display:flex;align-items:center;gap:12px;}
+.er-badge{
+  background:var(--er-red);color:#fff;
+  font-size:13px;font-weight:700;letter-spacing:.04em;
+  padding:6px 12px;border-radius:6px;
+  display:flex;align-items:center;gap:6px;flex-shrink:0;
+}
+.er-badge-cross{
+  width:16px;height:16px;position:relative;display:inline-flex;align-items:center;justify-content:center;
+}
+.er-badge-cross::before,.er-badge-cross::after{
+  content:'';position:absolute;background:#fff;border-radius:1px;
+}
+.er-badge-cross::before{width:10px;height:3px;}
+.er-badge-cross::after{width:3px;height:10px;}
+.header-titles h1{font-size:17px;font-weight:600;color:var(--color-text-primary);line-height:1.3;}
+.header-titles p{font-size:12px;color:var(--color-text-tertiary);margin-top:1px;}
+.header-right{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.hpill{
+  display:inline-flex;align-items:center;gap:5px;
+  font-size:11px;font-weight:500;padding:4px 10px;border-radius:99px;
+  border:1px solid var(--color-border-secondary);
+  color:var(--color-text-secondary);background:var(--color-background-secondary);
+  text-decoration:none;cursor:default;
+}
+a.hpill{cursor:pointer;}
+.hpill-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
+.hdivider{height:14px;width:1px;background:var(--color-border-secondary);}
+
+/* ── APP SHELL ── */
+.app{max-width: 1200px;margin: 0px auto;display:grid;grid-template-columns:236px 1fr;min-height:calc(100vh - 57px);}
+
+/* ── SIDEBAR ── */
+.sidebar{
+  background:var(--color-background-primary);
+  border-right:1px solid var(--color-border-tertiary);
+  padding:8px 0 24px;overflow-y:auto;
+  height:calc(100vh - 57px);
+  position:sticky;top:57px;
+}
+.sidebar-section{
+  font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--color-text-tertiary);
+  padding:14px 16px 4px;
+  display:flex;align-items:center;gap:6px;
+}
+.sidebar-section-bar{
+  flex:1;height:1px;background:var(--color-border-tertiary);
+}
+.svc-btn{
+  width:100%;text-align:left;background:none;border:none;
+  padding:7px 16px;cursor:pointer;
+  display:flex;align-items:center;gap:8px;
+  color:var(--color-text-primary);transition:background .1s;
+}
+.svc-btn:hover{background:var(--color-background-secondary);}
+.svc-btn.active{
+  background:var(--er-red-light);color:var(--er-coral);font-weight:600;
+  border-left:3px solid var(--er-red);
+  padding-left:13px;
+}
+@media(prefers-color-scheme:dark){
+  .svc-btn.active{background:rgba(192,57,43,.15);color:#F1948A;}
+}
+.svc-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+.svc-name{font-size:12.5px;flex:1;line-height:1.2;}
+.svc-num{font-size:10px;color:var(--color-text-tertiary);flex-shrink:0;}
+.svc-btn.active .svc-num{color:var(--er-red);}
+.sbadge{font-size:9px;font-weight:700;padding:1px 5px;border-radius:99px;flex-shrink:0;letter-spacing:.02em;}
+.sbadge-back{background:#185FA5;color:#E6F1FB;}
+.sbadge-fixed{background:#0E6655;color:#D1F2EB;}
+.sbadge-new{background:var(--er-red);color:#fff;}
+
+/* ── MAIN PANEL ── */
+.main{padding:22px 28px;overflow-y:auto;background:var(--color-background-tertiary);}
+
+/* ── PANEL HEADER ── */
+.panel-header{margin-bottom:16px;}
+.panel-tag{
+  display:inline-flex;align-items:center;gap:5px;
+  font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--er-red);background:var(--er-red-light);
+  padding:3px 10px;border-radius:99px;margin-bottom:8px;
+}
+@media(prefers-color-scheme:dark){.panel-tag{background:rgba(192,57,43,.2);color:#F1948A;}}
+.panel-title{font-size:19px;font-weight:700;margin-bottom:3px;line-height:1.3;}
+.panel-sub{font-size:13px;color:var(--color-text-secondary);margin-bottom:8px;line-height:1.5;}
+.doc-pill{
+  display:inline-flex;align-items:center;gap:5px;
+  font-size:10.5px;font-weight:500;padding:3px 10px;border-radius:99px;
+  border:1px solid var(--color-border-secondary);
+  color:var(--color-text-tertiary);
+  background:var(--color-background-primary);
+  margin-bottom:0;
+}
+
+/* ── METAPHOR BOX ── */
+.metaphor-box{
+  background:var(--color-background-primary);
+  border:1px solid var(--color-border-tertiary);
+  border-left:4px solid var(--er-red);
+  border-radius:var(--border-radius-lg);
+  padding:14px 16px;margin-bottom:14px;
+  font-size:14px;color:var(--color-text-secondary);line-height:1.7;
+}
+.metaphor-label{
+  font-size:10px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;
+  color:var(--er-red);margin-bottom:5px;
+  display:flex;align-items:center;gap:6px;
+}
+.metaphor-label::before{
+  content:'';display:inline-block;width:14px;height:14px;
+  background:var(--er-red);border-radius:3px;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 14 14' fill='none'%3E%3Cpath d='M7 2v10M2 7h10' stroke='white' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-size:cover;flex-shrink:0;
+}
+@media(prefers-color-scheme:dark){
+  .metaphor-box{border-left-color:#E74C3C;}
+  .metaphor-label{color:#F1948A;}
+}
+
+/* ── CORRECTION BOX ── */
+.correction-box{
+  background:var(--color-background-warning);
+  border:1px solid var(--color-border-warning);
+  border-left:4px solid #E67E22;
+  border-radius:var(--border-radius-lg);
+  padding:12px 14px;margin-bottom:12px;
+  font-size:13px;color:var(--color-text-warning);line-height:1.6;
+}
+.correction-label{
+  font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+  color:#E67E22;margin-bottom:4px;
+}
+
+/* ── SIM AREA ── */
+.sim-area{
+  background:var(--color-background-primary);
+  border:1px solid var(--color-border-tertiary);
+  border-radius:var(--border-radius-lg);
+  padding:16px;margin-bottom:12px;
+}
+.sim-title{
+  font-size:12px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;
+  color:var(--color-text-tertiary);margin-bottom:10px;
+}
+
+/* ── BUTTONS ── */
+.btn{
+  display:inline-flex;align-items:center;gap:5px;
+  padding:7px 14px;border-radius:var(--border-radius-md);border:none;
+  cursor:pointer;font-size:13px;font-weight:500;
+  transition:opacity .12s,transform .1s;
+}
+.btn:hover{opacity:.88;}
+.btn:active{transform:scale(.98);}
+.btn:disabled{opacity:.35;cursor:not-allowed;}
+.btn-primary{background:#1A5276;color:#D6EAF8;}
+.btn-red{background:var(--er-red);color:#fff;}
+.btn-success{background:#1E8449;color:#D5F5E3;}
+.btn-danger{background:#922B21;color:#FADBD8;}
+.btn-amber{background:#784212;color:#FDEBD0;}
+.btn-purple{background:#4A235A;color:#E8DAEF;}
+.btn-teal{background:#0E6655;color:#D1F2EB;}
+.btn-gray{background:var(--color-background-secondary);color:var(--color-text-secondary);border:1px solid var(--color-border-secondary);}
+.btn-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;}
+
+/* ── PIPELINE STAGES ── */
+.pipeline{display:flex;gap:4px;align-items:center;flex-wrap:wrap;margin-bottom:12px;}
+.stage{display:flex;flex-direction:column;align-items:center;gap:3px;min-width:68px;}
+.stage-box{
+  width:68px;height:44px;border-radius:8px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:10px;font-weight:600;text-align:center;line-height:1.2;
+  border:1.5px solid transparent;transition:all .3s;padding:3px;
+}
+.stage-idle{background:var(--color-background-secondary);border-color:var(--color-border-secondary);color:var(--color-text-tertiary);}
+.stage-running{background:#FDEBD0;border-color:#E67E22;color:#784212;}
+.stage-done{background:#D5F5E3;border-color:#27AE60;color:#1E8449;}
+.stage-fail{background:#FADBD8;border-color:#E74C3C;color:#922B21;}
+.stage-approval{background:#E8DAEF;border-color:#8E44AD;color:#4A235A;}
+.stage-lbl{font-size:9px;color:var(--color-text-tertiary);text-align:center;line-height:1.3;}
+.pipe-arrow{color:var(--color-text-tertiary);font-size:16px;flex-shrink:0;}
+@media(prefers-color-scheme:dark){
+  .stage-running{background:#3D200A;border-color:#E67E22;color:#FAC775;}
+  .stage-done{background:#0D3B1B;border-color:#27AE60;color:#7DCEA0;}
+  .stage-fail{background:#4A1010;border-color:#E74C3C;color:#F1948A;}
+  .stage-approval{background:#2E0F3B;border-color:#8E44AD;color:#D7BDE2;}
+}
+
+/* ── LOG ── */
+.log{
+  background:var(--color-background-tertiary);
+  border:1px solid var(--color-border-tertiary);
+  border-radius:6px;padding:10px 12px;
+  font-family:var(--font-mono);font-size:11.5px;
+  color:var(--color-text-secondary);max-height:140px;overflow-y:auto;line-height:1.8;
+}
+.log .ok{color:#1E8449;}.log .err{color:#C0392B;}.log .info{color:#1A5276;}.log .warn{color:#784212;}.log .purple{color:#4A235A;}
+@media(prefers-color-scheme:dark){
+  .log .ok{color:#7DCEA0;}.log .err{color:#F1948A;}.log .info{color:#85B7EB;}.log .warn{color:#FAC775;}.log .purple{color:#D7BDE2;}
+}
+
+/* ── METRICS ── */
+.metric-row{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px;}
+.metric{
+  flex:1;min-width:80px;
+  background:var(--color-background-secondary);
+  border:1px solid var(--color-border-tertiary);
+  border-radius:var(--border-radius-md);padding:10px 13px;
+}
+.metric-val{font-size:24px;font-weight:700;line-height:1;}
+.metric-lbl{font-size:11px;color:var(--color-text-tertiary);margin-top:3px;}
+
+/* ── ALARM ── */
+.alarm{
+  display:flex;align-items:center;gap:8px;
+  padding:9px 13px;border-radius:var(--border-radius-md);
+  font-size:13px;margin-bottom:10px;font-weight:500;
+}
+.alarm-ok{background:#D5F5E3;color:#1E8449;border:1px solid #27AE60;}
+.alarm-warn{background:#FDEBD0;color:#784212;border:1px solid #E67E22;}
+.alarm-crit{background:#FADBD8;color:#922B21;border:1px solid #E74C3C;}
+.alarm-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+@media(prefers-color-scheme:dark){
+  .alarm-ok{background:#0D3B1B;color:#7DCEA0;border-color:#27AE60;}
+  .alarm-warn{background:#3D200A;color:#FAC775;border-color:#E67E22;}
+  .alarm-crit{background:#4A1010;color:#F1948A;border-color:#E74C3C;}
+}
+
+/* ── ORDER ITEMS / ROWS ── */
+.row-item{
+  display:flex;align-items:center;gap:9px;
+  padding:8px 12px;border:1px solid var(--color-border-tertiary);
+  border-radius:var(--border-radius-md);
+  background:var(--color-background-primary);
+  font-size:13px;margin-bottom:6px;
+}
+
+/* ── PILLS ── */
+.pill{font-size:11px;font-weight:600;padding:2px 8px;border-radius:99px;white-space:nowrap;}
+.pill-green{background:#D5F5E3;color:#1E8449;}
+.pill-red{background:#FADBD8;color:#922B21;}
+.pill-blue{background:#D6EAF8;color:#1A5276;}
+.pill-amber{background:#FDEBD0;color:#784212;}
+.pill-purple{background:#E8DAEF;color:#4A235A;}
+.pill-gray{background:var(--color-background-secondary);color:var(--color-text-secondary);}
+@media(prefers-color-scheme:dark){
+  .pill-green{background:#0D3B1B;color:#7DCEA0;}
+  .pill-red{background:#4A1010;color:#F1948A;}
+  .pill-blue{background:#042C53;color:#85B7EB;}
+  .pill-amber{background:#3D200A;color:#FAC775;}
+  .pill-purple{background:#2E0F3B;color:#D7BDE2;}
+}
+
+/* ── TAGS ── */
+.tag{
+  font-size:11px;font-weight:500;padding:2px 8px;border-radius:99px;
+  background:var(--color-background-secondary);
+  color:var(--color-text-secondary);
+  border:1px solid var(--color-border-secondary);
+}
+.tag-row{display:flex;gap:5px;flex-wrap:wrap;}
+
+/* ── INFO GRID ── */
+.info-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;}
+.info-card{
+  background:var(--color-background-secondary);
+  border:1px solid var(--color-border-tertiary);
+  border-radius:var(--border-radius-md);padding:11px 13px;font-size:13px;
+}
+.info-card-title{font-weight:600;margin-bottom:4px;font-size:12.5px;}
+.info-card-body{color:var(--color-text-secondary);line-height:1.6;font-size:12px;}
+
+/* ── PROGRESS BAR ── */
+.progress-bar{height:7px;border-radius:4px;background:var(--color-border-tertiary);overflow:hidden;flex:1;}
+.progress-fill{height:100%;border-radius:4px;transition:width .4s;}
+
+/* ── SCROLL X ── */
+.scroll-x{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;}
+
+/* ── VITALS STRIP (new addition) ── */
+.vitals-strip{
+  display:flex;gap:8px;flex-wrap:wrap;
+  padding:10px 0;margin-bottom:14px;
+  border-bottom:1px dashed var(--color-border-tertiary);
+}
+.vital{
+  display:flex;flex-direction:column;align-items:center;
+  min-width:70px;
+  background:var(--color-background-primary);
+  border:1px solid var(--color-border-tertiary);
+  border-radius:var(--border-radius-md);padding:8px 12px;
+}
+.vital-val{font-size:18px;font-weight:700;line-height:1;}
+.vital-lbl{font-size:10px;color:var(--color-text-tertiary);margin-top:2px;text-align:center;}
+</style>
+
+<div class="header">
+  <div class="header-left">
+    <div class="er-badge">
+      <span class="er-badge-cross"></span>
+      ER
+    </div>
+    <div class="header-titles">
+      <h1>AWS DevOps Engineer — Hospital &amp; ER Simulation</h1>
+      <p>25 services · DOP-C02 exam guide · "City General Hospital" as the metaphor · verified docs.aws.amazon.com Apr 2026</p>
+    </div>
+  </div>
+  <div class="header-right">
+    <span class="hpill"><span class="hpill-dot" style="background:#C0392B"></span>DOP-C02</span>
+    <div class="hdivider"></div>
+    <span class="hpill"><span class="hpill-dot" style="background:#1E8449"></span>25 services</span>
+    <div class="hdivider"></div>
+    <a class="hpill" href="https://docs.aws.amazon.com/" target="_blank">
+      <svg width="10" height="10" viewBox="0 0 12 12" fill="none"><path d="M2 10L10 2M10 2H5M10 2v5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      AWS docs
+    </a>
+  </div>
+</div>
+
+<div class="app">
+<div class="sidebar">
+
+  <div class="sidebar-section">CI/CD <span style="font-size:9px;color:var(--er-red);font-weight:700;margin-left:2px">22%</span><div class="sidebar-section-bar"></div></div>
+  <button class="svc-btn active" onclick="show('pipeline')"><span class="svc-dot" style="background:#1A5276"></span><span class="svc-name">CodePipeline</span><span class="svc-num">#1</span></button>
+  <button class="svc-btn" onclick="show('build')"><span class="svc-dot" style="background:#1A5276"></span><span class="svc-name">CodeBuild</span><span class="svc-num">#2</span></button>
+  <button class="svc-btn" onclick="show('deploy')"><span class="svc-dot" style="background:#1A5276"></span><span class="svc-name">CodeDeploy</span><span class="svc-num">#3</span></button>
+  <button class="svc-btn" onclick="show('commit')"><span class="svc-dot" style="background:#1A5276"></span><span class="svc-name">CodeCommit</span><span class="sbadge sbadge-back">BACK</span><span class="svc-num">#4</span></button>
+  <button class="svc-btn" onclick="show('artifact')"><span class="svc-dot" style="background:#1A5276"></span><span class="svc-name">CodeArtifact</span><span class="svc-num">#5</span></button>
+  <button class="svc-btn" onclick="show('beanstalk')"><span class="svc-dot" style="background:#1A5276"></span><span class="svc-name">Elastic Beanstalk</span><span class="svc-num">#6</span></button>
+
+  <div class="sidebar-section">IaC <span style="font-size:9px;color:var(--er-red);font-weight:700;margin-left:2px">17%</span><div class="sidebar-section-bar"></div></div>
+  <button class="svc-btn" onclick="show('cfn')"><span class="svc-dot" style="background:#0E6655"></span><span class="svc-name">CloudFormation</span><span class="svc-num">#7</span></button>
+  <button class="svc-btn" onclick="show('cdk')"><span class="svc-dot" style="background:#0E6655"></span><span class="svc-name">CDK</span><span class="svc-num">#8</span></button>
+  <button class="svc-btn" onclick="show('ssm')"><span class="svc-dot" style="background:#0E6655"></span><span class="svc-name">Systems Manager</span><span class="svc-num">#9</span></button>
+  <button class="svc-btn" onclick="show('ssm_app')"><span class="svc-dot" style="background:#0E6655"></span><span class="svc-name">SSM App Manager</span><span class="sbadge sbadge-fixed">FIXED</span><span class="svc-num">#10</span></button>
+
+  <div class="sidebar-section">Compute<div class="sidebar-section-bar"></div></div>
+  <button class="svc-btn" onclick="show('ecs')"><span class="svc-dot" style="background:#784212"></span><span class="svc-name">ECS</span><span class="svc-num">#11</span></button>
+  <button class="svc-btn" onclick="show('eks')"><span class="svc-dot" style="background:#784212"></span><span class="svc-name">EKS</span><span class="svc-num">#12</span></button>
+  <button class="svc-btn" onclick="show('lambda')"><span class="svc-dot" style="background:#784212"></span><span class="svc-name">Lambda</span><span class="svc-num">#13</span></button>
+  <button class="svc-btn" onclick="show('asg')"><span class="svc-dot" style="background:#784212"></span><span class="svc-name">Auto Scaling</span><span class="svc-num">#14</span></button>
+
+  <div class="sidebar-section">Monitoring <span style="font-size:9px;color:var(--er-red);font-weight:700;margin-left:2px">15%</span><div class="sidebar-section-bar"></div></div>
+  <button class="svc-btn" onclick="show('cw')"><span class="svc-dot" style="background:#4A235A"></span><span class="svc-name">CloudWatch</span><span class="svc-num">#15</span></button>
+  <button class="svc-btn" onclick="show('xray')"><span class="svc-dot" style="background:#4A235A"></span><span class="svc-name">X-Ray</span><span class="svc-num">#16</span></button>
+  <button class="svc-btn" onclick="show('eb')"><span class="svc-dot" style="background:#4A235A"></span><span class="svc-name">EventBridge</span><span class="svc-num">#17</span></button>
+
+  <div class="sidebar-section">Governance <span style="font-size:9px;color:var(--er-red);font-weight:700;margin-left:2px">17%</span><div class="sidebar-section-bar"></div></div>
+  <button class="svc-btn" onclick="show('config')"><span class="svc-dot" style="background:#C0392B"></span><span class="svc-name">AWS Config</span><span class="svc-num">#18</span></button>
+  <button class="svc-btn" onclick="show('trail')"><span class="svc-dot" style="background:#C0392B"></span><span class="svc-name">CloudTrail</span><span class="svc-num">#19</span></button>
+  <button class="svc-btn" onclick="show('iam')"><span class="svc-dot" style="background:#C0392B"></span><span class="svc-name">IAM</span><span class="svc-num">#20</span></button>
+
+  <div class="sidebar-section">Networking<div class="sidebar-section-bar"></div></div>
+  <button class="svc-btn" onclick="show('r53')"><span class="svc-dot" style="background:#922B21"></span><span class="svc-name">Route 53</span><span class="svc-num">#21</span></button>
+  <button class="svc-btn" onclick="show('elb')"><span class="svc-dot" style="background:#922B21"></span><span class="svc-name">Elastic Load Balancer</span><span class="svc-num">#22</span></button>
+  <button class="svc-btn" onclick="show('sqs')"><span class="svc-dot" style="background:#922B21"></span><span class="svc-name">SQS</span><span class="svc-num">#23</span></button>
+  <button class="svc-btn" onclick="show('sns')"><span class="svc-dot" style="background:#922B21"></span><span class="svc-name">SNS</span><span class="svc-num">#24</span></button>
+  <button class="svc-btn" onclick="show('s3')"><span class="svc-dot" style="background:#922B21"></span><span class="svc-name">S3</span><span class="svc-num">#25</span></button>
+
+</div>
+<div class="main" id="main-area"></div>
+</div>
+
+<script>
+/* ── STATE ── */
+let buildLog=[], pipelineState=['idle','idle','idle','idle','idle'], approvalPending=false;
+let cwMetrics={patients:0,critical:0,waitTime:14}, alarmState='ok';
+let events=[], trailLog=[], traces=[];
+let commits=[
+  {hash:'a3f9c',msg:'Add cardiac surgery protocol v2',author:'Dr. Mario',time:'2 min ago'},
+  {hash:'b71d2',msg:'Fix ICU monitoring bug',author:'Dr. Aiko',time:'15 min ago'},
+  {hash:'d9e41',msg:'Update ambulance routing algorithm',author:'SysOps Sam',time:'1 hr ago'}
+];
+let packages=[
+  {name:'cardiac-monitor-lib',ver:'2.3.1',dl:1420},
+  {name:'patient-record-sdk',ver:'1.8.0',dl:830},
+  {name:'lab-results-api',ver:'3.0.2',dl:2100}
+];
+let containers=[
+  {id:'triage-svc-1',status:'running',cpu:34},
+  {id:'triage-svc-2',status:'running',cpu:28},
+  {id:'lab-worker-1',status:'running',cpu:55}
+];
+let instances=2;
+let ssmParams=[
+  {key:'/hospital/db-password',val:'••••••••',type:'SecureString'},
+  {key:'/hospital/pacs-api-key',val:'••••••••',type:'SecureString'},
+  {key:'/hospital/max-concurrent-patients',val:'150',type:'String'}
+];
+let appMgrApps=[
+  {name:'patient-portal',stacks:3,healthy:3},
+  {name:'er-dispatch',stacks:2,healthy:1},
+  {name:'billing-system',stacks:1,healthy:1}
+];
+let configRules=[
+  {name:'PHI encryption enabled (HIPAA)',status:'ok'},
+  {name:'MRI machine maintenance current',status:'ok'},
+  {name:'All ER exits unobstructed',status:'ok'}
+];
+let iamRoles=[
+  {name:'Nurse',perms:['patient-records','ward']},
+  {name:'Radiologist',perms:['imaging','lab']},
+  {name:'Chief of Medicine',perms:['patient-records','ward','imaging','lab','pharmacy','admin']}
+];
+let sqsQueue=[], sqsMsgCount=0;
+let snsTopics=[
+  {name:'critical-alerts',subs:['er-team@hospital.com','on-call-pager','cmo-phone']},
+  {name:'lab-results-ready',subs:['ordering-doctor@hospital.com','nurse-station-lambda']}
+];
+let s3Buckets=[
+  {name:'hospital-deployments',objects:28,size:'4.1 GB'},
+  {name:'patient-imaging-archive',objects:182441,size:'3.2 TB'},
+  {name:'audit-logs-hipaa',objects:9,size:'1.2 GB'}
+];
+let r53Records=[
+  {name:'hospital.com',type:'A',target:'203.0.113.10',health:'healthy'},
+  {name:'api.hospital.com',type:'CNAME',target:'alb-1234.amazonaws.com',health:'healthy'},
+  {name:'dr-backup.hospital.com',type:'A',target:'203.0.113.20',health:'healthy'}
+];
+let elbTargets=[
+  {id:'i-0a1b',zone:'us-east-1a',health:'healthy',req:142},
+  {id:'i-0c2d',zone:'us-east-1b',health:'healthy',req:138},
+  {id:'i-0e3f',zone:'us-east-1c',health:'healthy',req:156}
+];
+let lamInv=0, lamCost=0, patientCount=0;
+
+function addEvent(msg,type){events.unshift({msg,type,time:new Date().toLocaleTimeString()});if(events.length>8)events.pop();}
+function addTrail(svc,action,detail){trailLog.unshift({svc,action,user:'ER-Role',time:new Date().toLocaleTimeString(),detail:JSON.stringify(detail)});if(trailLog.length>7)trailLog.pop();}
+function checkAlarm(){alarmState=cwMetrics.critical>=3?'crit':cwMetrics.critical>=1?'warn':'ok';}
+function admitPatient(condition){
+  patientCount++;cwMetrics.patients++;
+  sqsQueue.unshift({msg:'AdmitPatient #'+patientCount,vis:30});sqsMsgCount++;
+  addEvent('Patient admitted: '+condition+' #'+patientCount,'admission');
+  addTrail('PatientService','AdmitPatient',{condition,id:patientCount});
+  rerender();
+}
+function logHtml(){return buildLog.map(l=>`<div class="${l.cls}">${l.msg}</div>`).join('')||'<span style="color:var(--color-text-tertiary)">No events yet. Interact with the simulation.</span>';}
+
+let currentPanel='pipeline';
+const panelKeys=['pipeline','build','deploy','commit','artifact','beanstalk','cfn','cdk','ssm','ssm_app','ecs','eks','lambda','asg','cw','xray','eb','config','trail','iam','r53','elb','sqs','sns','s3'];
+
+function show(id){
+  currentPanel=id;
+  document.querySelectorAll('.svc-btn').forEach(b=>b.classList.remove('active'));
+  const idx=panelKeys.indexOf(id);
+  const btns=document.querySelectorAll('.svc-btn');
+  if(btns[idx])btns[idx].classList.add('active');
+  rerender();
+}
+
+function rerender(){
+  document.getElementById('main-area').innerHTML=renderPanel(currentPanel);
+}
+
+function ts(){return new Date().toLocaleTimeString();}
+
+function panelHead(tag,title,sub,docNote){
+  return`<div class="panel-header">
+    <div class="panel-tag">${tag}</div>
+    <div class="panel-title">${title}</div>
+    <div class="panel-sub">${sub}</div>
+    <span class="doc-pill">
+      <svg width="10" height="10" viewBox="0 0 12 12" fill="none"><path d="M2 10L10 2M10 2H5M10 2v5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      docs.aws.amazon.com — verified Apr 2026: ${docNote}
+    </span>
+  </div>`;
+}
+function metaphor(er_role, aws_service, text){
+  return`<div class="metaphor-box">
+    <div class="metaphor-label">ER Metaphor &nbsp;·&nbsp; <span style="font-weight:400;text-transform:none;letter-spacing:0">${er_role} = ${aws_service}</span></div>
+    ${text}
+  </div>`;
+}
+function corrBox(msg){
+  return`<div class="correction-box"><div class="correction-label">Official AWS docs correction</div>${msg}</div>`;
+}
+
+function renderPanel(id){
+  switch(id){
+    case 'pipeline': return rPipeline();
+    case 'build':    return rBuild();
+    case 'deploy':   return rDeploy();
+    case 'commit':   return rCommit();
+    case 'artifact': return rArtifact();
+    case 'beanstalk':return rBeanstalk();
+    case 'cfn':      return rCfn();
+    case 'cdk':      return rCdk();
+    case 'ssm':      return rSsm();
+    case 'ssm_app':  return rSsmApp();
+    case 'ecs':      return rEcs();
+    case 'eks':      return rEks();
+    case 'lambda':   return rLambda();
+    case 'asg':      return rAsg();
+    case 'cw':       return rCw();
+    case 'xray':     return rXray();
+    case 'eb':       return rEb();
+    case 'config':   return rConfig();
+    case 'trail':    return rTrail();
+    case 'iam':      return rIam();
+    case 'r53':      return rR53();
+    case 'elb':      return rElb();
+    case 'sqs':      return rSqs();
+    case 'sns':      return rSns();
+    case 's3':       return rS3();
+    default: return '';
+  }
+}
+
+/* ══════════════════════════════════════════
+   PANELS
+══════════════════════════════════════════ */
+
+function rPipeline(){
+  const stages=['Intake','Prep','Surgery','Sign-off','Discharge'];
+  const icons=['Chart filed','OR prepped','Operating','Chief approves','Patient home'];
+  let s=panelHead('CI/CD · #1','CodePipeline — The Hospital Treatment Pathway',
+    'Orchestrates every step: Patient intake → preparation → surgery → chief approval → discharge.',
+    '6 action types: source, build, test, deploy, approval, invoke');
+  s+=corrBox('The <b>Approval action</b> was missing in earlier versions. Per AWS docs, valid action types are: source, build, test, deploy, <b>approval</b>, and invoke. The approval gate pauses the pipeline — like the Chief of Medicine signing off before a patient is discharged after surgery.');
+  s+=metaphor('The Treatment Pathway','CodePipeline',
+    'A patient (code change) arrives in the ER. The pathway manager (CodePipeline) automatically moves them through every station — intake → prep → OR → chief sign-off → discharge. No staff member has to manually call the next station. And if the surgery fails (test stage), the patient never reaches the discharge desk.');
+  s+=`<div class="sim-area"><div class="sim-title">Treatment pathway — run a patient through the system</div>
+  <div class="pipeline">`;
+  const stageStyles=['stage-idle','stage-idle','stage-idle','stage-approval','stage-idle'];
+  stages.forEach((st,i)=>{
+    const base=pipelineState[i]==='idle'?stageStyles[i]:pipelineState[i]==='running'?'stage-running':pipelineState[i]==='done'?'stage-done':pipelineState[i]==='approval'?'stage-approval':'stage-fail';
+    s+=`<div class="stage"><div class="stage-box ${base}">${st}</div><div class="stage-lbl">${icons[i]}</div></div>`;
+    if(i<4)s+=`<div class="pipe-arrow">→</div>`;
+  });
+  s+=`</div>
+  <div class="btn-row">
+    <button class="btn btn-primary" onclick="runPipeline(false)">Admit new patient (push code)</button>
+    <button class="btn btn-danger" onclick="runPipeline(true)">Surgery complication (fail test)</button>
+    <button class="btn btn-purple" id="approve-btn" onclick="approveGate()" ${!approvalPending?'disabled':''}>Chief signs discharge (Approve)</button>
+    <button class="btn btn-gray" onclick="resetPipeline()">Reset</button>
+  </div></div>
+  <div class="sim-area"><div class="sim-title">Treatment log</div><div class="log">${logHtml()}</div></div>
+  <div class="sim-area"><div class="sim-title">Execution modes (exam tip)</div>
+  <div class="info-grid">
+    <div class="info-card"><div class="info-card-title">SUPERSEDED (default)</div><div class="info-card-body">New emergency bumps a waiting patient out of the queue — the newer case takes priority.</div></div>
+    <div class="info-card"><div class="info-card-title">QUEUED</div><div class="info-card-body">Patients treated strictly in arrival order — nobody jumps the queue.</div></div>
+    <div class="info-card"><div class="info-card-title">PARALLEL</div><div class="info-card-body">Multiple patients treated simultaneously in different ORs. No rollback available.</div></div>
+    <div class="info-card"><div class="info-card-title">Stage conditions (2024)</div><div class="info-card-body">Attach a vital-sign alarm (CloudWatch) to auto-halt the pathway if a patient deteriorates.</div></div>
+  </div></div>`;
+  return s;
+}
+function runPipeline(fail){
+  pipelineState=['idle','idle','idle','idle','idle'];approvalPending=false;buildLog=[];
+  let delay=0;
+  ['Intake','Prep','Surgery','Sign-off','Discharge'].forEach((st,i)=>{
+    if(fail&&i>=2){
+      if(i===2){setTimeout(()=>{pipelineState[2]='running';buildLog.push({msg:`[${ts()}] Surgery — patient in OR...`,cls:'info'});rerender();setTimeout(()=>{pipelineState[2]='fail';buildLog.push({msg:`[${ts()}] Surgery FAILED: unexpected complication detected!`,cls:'err'});buildLog.push({msg:`[${ts()}] Pathway stopped. Sign-off and Discharge will NOT run.`,cls:'err'});rerender();},1100);}
+      ,delay);}return;
+    }
+    if(i===3){
+      setTimeout(()=>{pipelineState[3]='approval';buildLog.push({msg:`[${ts()}] Sign-off — WAITING for Chief of Medicine approval...`,cls:'purple'});approvalPending=true;rerender();},delay);
+      delay+=1600;return;
+    }
+    setTimeout(()=>{pipelineState[i]='running';buildLog.push({msg:`[${ts()}] ${st} — in progress...`,cls:'info'});rerender();
+      setTimeout(()=>{pipelineState[i]='done';buildLog.push({msg:`[${ts()}] ${st} — COMPLETE`,cls:'ok'});rerender();},1100);
+    },delay);delay+=1600;
+  });
+}
+function approveGate(){
+  if(!approvalPending)return;
+  approvalPending=false;pipelineState[3]='done';
+  buildLog.push({msg:`[${ts()}] Chief of Medicine signed discharge form — APPROVED`,cls:'ok'});
+  addTrail('CodePipeline','ApproveAction',{stage:'Sign-off',result:'Approved'});
+  setTimeout(()=>{pipelineState[4]='running';buildLog.push({msg:`[${ts()}] Discharge — patient being released...`,cls:'info'});rerender();
+    setTimeout(()=>{pipelineState[4]='done';buildLog.push({msg:`[${ts()}] Discharge COMPLETE. Patient safely home!`,cls:'ok'});rerender();},1200);
+  },400);rerender();
+}
+function resetPipeline(){pipelineState=['idle','idle','idle','idle','idle'];buildLog=[];approvalPending=false;rerender();}
+
+function rBuild(){
+  let s=panelHead('CI/CD · #2','CodeBuild — The Operating Room & Surgical Team',
+    'Compiles code, runs tests, produces build artifacts. Fully managed, pay per build-minute.',
+    'Artifacts stored in S3 bucket between pipeline stages');
+  s+=metaphor('The Operating Room','CodeBuild',
+    'The patient\'s raw test results and charts (source code) go into the OR (CodeBuild). The surgical team (compiler) operates following a precise protocol (buildspec.yml) — prep → anaesthesia → surgery → recovery. If any step fails (bad lab result), the operation is halted immediately and a detailed error report is issued. A successful surgery produces a healthy, packaged patient ready for the ward (build artifact).');
+  s+=`<div class="sim-area"><div class="sim-title">Run a surgical procedure (build)</div>
+  <div class="btn-row">
+    <button class="btn btn-primary" onclick="runBuild('Cardiac')">Cardiac surgery (build app)</button>
+    <button class="btn btn-teal" onclick="runBuild('Ortho')">Orthopaedic op (build service)</button>
+    <button class="btn btn-danger" onclick="runBuild('Bad')">Contaminated instruments (build failure)</button>
+  </div></div>
+  <div class="sim-area"><div class="sim-title">OR log (buildspec.yml phases)</div><div class="log">${logHtml()}</div></div>
+  <div class="sim-area"><div class="sim-title">Key exam facts</div>
+  <div class="info-grid">
+    <div class="info-card"><div class="info-card-title">buildspec.yml phases</div><div class="info-card-body">install → pre_build → build → post_build. Like surgical phases: sterilise → prep patient → operate → close.</div></div>
+    <div class="info-card"><div class="info-card-title">Artifact store</div><div class="info-card-body">CodeBuild outputs to S3. CodePipeline picks it up for the next stage — like handing off to the recovery ward.</div></div>
+    <div class="info-card"><div class="info-card-title">VPC support</div><div class="info-card-body">CodeBuild can run inside your VPC — like a private operating theatre away from public corridors.</div></div>
+    <div class="info-card"><div class="info-card-title">Caching</div><div class="info-card-body">Cache surgical supplies in S3 so each operation doesn't wait for a fresh delivery of gloves and gauze.</div></div>
+  </div></div>`;
+  return s;
+}
+function runBuild(t){
+  buildLog=[];
+  buildLog.push({msg:`[BUILD] install: Sterilising theatre, checking equipment...`,cls:'info'});
+  buildLog.push({msg:`[BUILD] pre_build: Anaesthesia administered, pre-op checks running...`,cls:'info'});
+  setTimeout(()=>{
+    if(t==='Bad'){
+      buildLog.push({msg:`[ERROR] build: Contaminated instrument detected — patient-record-sdk v0.0.1 missing!`,cls:'err'});
+      buildLog.push({msg:`[BUILD] Operation ABORTED. Exit code 1. No artifact produced.`,cls:'err'});
+    } else {
+      buildLog.push({msg:`[BUILD] build: ${t} surgery in progress... all vitals stable`,cls:'ok'});
+      buildLog.push({msg:`[BUILD] post_build: Patient sutured and packaged → ${t.toLowerCase()}-v1.3.zip`,cls:'ok'});
+      buildLog.push({msg:`[BUILD] Transferring patient record to S3 pipeline bucket...`,cls:'ok'});
+      buildLog.push({msg:`[BUILD] SUCCESS. OR time: 14.2 min. Cost: $0.0023`,cls:'ok'});
+    }
+    rerender();
+  },900);rerender();
+}
+
+function rDeploy(){
+  let s=panelHead('CI/CD · #3','CodeDeploy — The Patient Transfer Team',
+    'Deploys to EC2, ECS, Lambda. Blue/green, rolling, canary, all-at-once.',
+    'Lifecycle hooks: BeforeInstall, AfterInstall, ApplicationStart, ValidateService');
+  s+=metaphor('The Patient Transfer Team','CodeDeploy',
+    'When a new treatment protocol (software version) is approved, the transfer team (CodeDeploy) moves patients to the new ward using different strategies. All-at-once: move everyone at once — fast but chaotic. Rolling: transfer one ward at a time — safer. Blue/Green: run two identical hospitals, then redirect the ambulances to the new one. Canary: send 10% of patients to the new ward first and watch their recovery before moving everyone.');
+  s+=`<div class="sim-area"><div class="sim-title">Choose patient transfer strategy</div>
+  <div class="scroll-x" style="margin-bottom:10px">
+    ${['all-at-once','rolling','blue/green','canary 10%','rollback'].map(x=>`<button class="btn btn-primary" style="white-space:nowrap" onclick="runDeploy('${x}')">${x}</button>`).join('')}
+  </div><div class="log">${logHtml()}</div></div>
+  <div class="sim-area"><div class="sim-title">Lifecycle hooks (exam-critical)</div>
+  <div style="font-size:13px;color:var(--color-text-secondary);line-height:2">
+    <b>BeforeInstall</b> → back up current patient charts before the new system goes live<br>
+    <b>AfterInstall</b> → set access permissions on the new ward<br>
+    <b>ApplicationStart</b> → power on monitoring equipment, start all services<br>
+    <b>ValidateService</b> → run vital sign checks; trigger rollback if any patient is critical
+  </div></div>`;
+  return s;
+}
+function runDeploy(s){
+  buildLog=[];buildLog.push({msg:`[DEPLOY] Transfer strategy: ${s}`,cls:'info'});
+  setTimeout(()=>{
+    if(s==='canary 10%'){
+      buildLog.push({msg:`[DEPLOY] BeforeInstall: backing up ward A patient charts`,cls:'ok'});
+      buildLog.push({msg:`[DEPLOY] Moving 10% of patients to new ward...`,cls:'info'});
+      buildLog.push({msg:`[DEPLOY] ValidateService: all 10% vitals stable — OK`,cls:'ok'});
+      buildLog.push({msg:`[DEPLOY] Moving remaining 90%. Transfer complete.`,cls:'ok'});
+    } else if(s==='blue/green'){
+      buildLog.push({msg:`[DEPLOY] Constructing identical Green hospital wing...`,cls:'info'});
+      buildLog.push({msg:`[DEPLOY] ApplicationStart: all equipment online in Green wing`,cls:'ok'});
+      buildLog.push({msg:`[DEPLOY] Redirecting ambulances: Blue wing → Green wing`,cls:'ok'});
+      buildLog.push({msg:`[DEPLOY] Blue wing kept on standby for 1hr rollback window.`,cls:'ok'});
+    } else if(s==='rolling'){
+      ['Ward A','Ward B','Ward C'].forEach(w=>buildLog.push({msg:`[DEPLOY] ${w}: BeforeInstall → Transfer → ValidateService — OK`,cls:'ok'}));
+    } else if(s==='rollback'){
+      buildLog.push({msg:`[DEPLOY] Patient deterioration detected via CloudWatch alarm!`,cls:'warn'});
+      buildLog.push({msg:`[DEPLOY] Emergency rollback — returning all patients to previous ward...`,cls:'info'});
+      buildLog.push({msg:`[DEPLOY] Rollback complete. All patients stable on previous protocol.`,cls:'ok'});
+    } else {
+      buildLog.push({msg:`[DEPLOY] Moving ALL patients at once — expect ~8s disruption`,cls:'warn'});
+      buildLog.push({msg:`[DEPLOY] Not recommended for critical care units.`,cls:'warn'});
+      buildLog.push({msg:`[DEPLOY] Transfer complete.`,cls:'ok'});
+    }
+    rerender();
+  },800);rerender();
+}
+
+function rCommit(){
+  let s=panelHead('CI/CD · #4','CodeCommit — The Medical Records Archive',
+    'Managed private Git. IAM-native, VPC endpoint, CloudTrail logging. Back to full GA Nov 2025.',
+    'Returned to GA Nov 2025. IAM integration, VPC endpoints, CloudTrail logging.');
+  s+=corrBox('AWS temporarily de-emphasized CodeCommit in July 2024. After strong customer feedback — especially from regulated industries like healthcare and finance — AWS <b>reversed the decision in November 2025</b>. CodeCommit is back to full General Availability with a published feature roadmap including Git LFS support.');
+  s+=metaphor('The Medical Records Archive','CodeCommit',
+    'Every treatment protocol and surgical procedure your team has ever written lives in the secure medical archive (CodeCommit). Doctors work on their own copy of the charts and merge changes through peer review. Every version is kept forever — if a new protocol causes harm, you instantly roll back to last month\'s version. Unlike a public cloud filing service, these records never leave the hospital\'s secure network (VPC boundary).');
+  s+=`<div class="sim-area"><div class="sim-title">Medical records — recent protocol commits</div>
+  <div>${commits.map(c=>`<div class="row-item"><code style="font-size:11.5px;color:var(--color-text-tertiary);min-width:50px">${c.hash}</code><div style="flex:1"><div style="font-weight:500">${c.msg}</div><div style="font-size:11px;color:var(--color-text-tertiary);margin-top:1px">${c.author} · ${c.time}</div></div></div>`).join('')}</div>
+  <div class="btn-row">
+    <button class="btn btn-primary" onclick="addCommit()">File new treatment protocol</button>
+    <button class="btn btn-gray" onclick="addBranch()">Create experimental branch</button>
+  </div></div>
+  <div class="sim-area"><div class="sim-title">Why CodeCommit over GitHub for regulated industries</div>
+  <div class="info-grid">
+    <div class="info-card"><div class="info-card-title">IAM integration</div><div class="info-card-body">Access controlled by IAM roles — no separate SSH keys. A nurse's badge controls chart access.</div></div>
+    <div class="info-card"><div class="info-card-title">VPC endpoint</div><div class="info-card-body">Medical records never leave the hospital's private network. HIPAA-critical.</div></div>
+    <div class="info-card"><div class="info-card-title">CloudTrail logging</div><div class="info-card-body">Every chart access, edit, and download is logged automatically — full audit trail.</div></div>
+    <div class="info-card"><div class="info-card-title">Triggers → CodePipeline</div><div class="info-card-body">A new protocol filing instantly triggers the treatment pathway via EventBridge.</div></div>
+  </div></div>`;
+  return s;
+}
+function addCommit(){
+  const msgs=['New cardiac arrest protocol v3','Fix medication dosage calculation','Update triage scoring algorithm','Add paediatric emergency pathway'];
+  const authors=['Dr. Mario','Dr. Aiko','SysOps Sam','Dr. Chen'];
+  commits.unshift({hash:Math.random().toString(36).substr(2,5),msg:msgs[Math.floor(Math.random()*msgs.length)],author:authors[Math.floor(Math.random()*authors.length)],time:'just now'});
+  addTrail('CodeCommit','PutFile',{branch:'main'});rerender();
+}
+function addBranch(){commits.unshift({hash:'branch',msg:'→ feature/experimental-ai-triage branched from main',author:'You',time:'just now'});rerender();}
+
+function rArtifact(){
+  let s=panelHead('CI/CD · #5','CodeArtifact — The Hospital Pharmacy & Supply Chain',
+    'Managed package repo: npm, Maven, PyPI, NuGet. Upstream caching from public registries.',
+    'Upstream repos: cache from public registries, serve internally approved versions only');
+  s+=metaphor('The Hospital Pharmacy','CodeArtifact',
+    'Doctors don\'t go to a random shop for medication — they order from the hospital pharmacy (CodeArtifact) which only stocks drugs that have passed clinical trials and been approved by the chief pharmacist. If a new drug arrives from the manufacturer (public npm/PyPI), the pharmacy inspects and approves it before any doctor can prescribe it. Version control means you always know exactly which batch of medication was used on which patient.');
+  s+=`<div class="sim-area"><div class="sim-title">Hospital pharmacy — approved medication registry</div>
+  ${packages.map(p=>`<div class="row-item"><div style="flex:1"><div style="font-weight:500">${p.name}</div><div style="font-size:11px;color:var(--color-text-tertiary)">v${p.ver} · ${p.dl} prescriptions</div></div><button class="btn btn-gray" style="padding:3px 10px;font-size:12px" onclick="dispensePkg('${p.name}')">Dispense</button></div>`).join('')}
+  <div class="btn-row"><button class="btn btn-success" onclick="publishPkg()">Add new approved medication</button></div>
+  <div class="log" style="margin-top:10px">${logHtml()}</div></div>`;
+  return s;
+}
+function dispensePkg(n){buildLog=[{msg:`[PHARMACY] Checking formulary for ${n}...`,cls:'info'},{msg:`[PHARMACY] ${n} approved and in stock (upstream cache hit)`,cls:'ok'},{msg:`[PHARMACY] Dispensed to OR build environment — OK`,cls:'ok'}];rerender();}
+function publishPkg(){packages.unshift({name:'ai-diagnostic-engine',ver:'1.0.0',dl:0});addTrail('CodeArtifact','PublishPackage',{pkg:'ai-diagnostic-engine'});rerender();}
+
+function rBeanstalk(){
+  let s=panelHead('CI/CD · #6','Elastic Beanstalk — The Prefab Hospital Wing',
+    'PaaS: auto-provisions ALB + EC2 + ASG + RDS. Supports rolling, blue/green.',
+    '.ebextensions for custom config; CNAME swap for blue/green; RDS outside env for prod');
+  s+=metaphor('The Prefab Hospital Wing','Elastic Beanstalk',
+    'Building a new hospital wing from scratch takes years — architects, contractors, permits. Elastic Beanstalk is a prefab hospital wing: you hand it your medical equipment list (application code) and it assembles the full wing automatically — operating theatres, wards, staff rooms, power supply. You just focus on treating patients, not construction.');
+  s+=`<div class="sim-area"><div class="sim-title">Deploy a new hospital wing</div>
+  <div style="font-size:13px;color:var(--color-text-secondary);margin-bottom:12px">Beanstalk auto-provisions: ALB + EC2 (2×) + Auto Scaling + optional RDS patient database</div>
+  <button class="btn btn-primary" onclick="deployEB()">Open new emergency wing</button>
+  <div class="log" style="margin-top:10px">${logHtml()}</div></div>
+  <div class="sim-area"><div class="sim-title">Exam tips</div>
+  <div class="info-grid">
+    <div class="info-card"><div class="info-card-title">.ebextensions</div><div class="info-card-body">YAML config bundled with your code — install medical monitoring software, set up cron jobs, add custom network rules.</div></div>
+    <div class="info-card"><div class="info-card-title">Blue/green via CNAME swap</div><div class="info-card-body">Two identical wings. Redirect the front door sign (DNS CNAME) from old wing to new instantly — easy rollback.</div></div>
+    <div class="info-card"><div class="info-card-title">RDS best practice</div><div class="info-card-body">Keep the patient database (RDS) outside Beanstalk. Demolishing a wing must not delete the patient records.</div></div>
+    <div class="info-card"><div class="info-card-title">Saved configs</div><div class="info-card-body">Archive the exact wing blueprint to S3. Open identical wards in any region instantly.</div></div>
+  </div></div>`;
+  return s;
+}
+function deployEB(){
+  buildLog=[];
+  const steps=[
+    {msg:'[EB] Laying foundations: EC2 instances (2×) launching...',cls:'info'},
+    {msg:'[EB] Installing triage desk: ALB and target group attached...',cls:'info'},
+    {msg:'[EB] Staffing agency on standby: Auto Scaling configured (min:2 max:8)',cls:'info'},
+    {msg:'[EB] Unpacking medical equipment: hospital-app-v2.zip from S3...',cls:'info'},
+    {msg:'[EB] .ebextensions: Configuring patient monitoring nginx rules',cls:'ok'},
+    {msg:'[EB] Health check: All systems HEALTHY',cls:'ok'},
+    {msg:'[EB] New wing open at hospital-app.elasticbeanstalk.com',cls:'ok'}
+  ];
+  steps.forEach((s,i)=>setTimeout(()=>{buildLog.push(s);rerender();},i*600));
+}
+
+function rCfn(){
+  let s=panelHead('IaC · #7','CloudFormation — The Hospital Architectural Blueprint',
+    'IaC with JSON/YAML. Stacks, StackSets, drift detection, change sets, rollbacks.',
+    'StackSets: deploy one template across multiple accounts and regions simultaneously');
+  s+=metaphor('The Architectural Blueprint','CloudFormation',
+    'Before building a hospital, every detail is drawn on paper — where each OR goes, how many beds per ward, where the fire exits are. CloudFormation is that blueprint in YAML code. AWS constructs exactly what the blueprint says. If someone moves a wall without updating the blueprint (drift), the inspector flags it immediately.');
+  s+=`<div class="sim-area"><div class="sim-title">Hospital blueprint management</div>
+  <div class="btn-row">
+    <button class="btn btn-primary" onclick="cfnDeploy()">Build hospital (deploy stack)</button>
+    <button class="btn btn-amber" onclick="cfnDrift()">Inspect for unauthorised changes (detect drift)</button>
+    <button class="btn btn-gray" onclick="cfnChangeset()">Propose renovation (change set)</button>
+    <button class="btn btn-teal" onclick="cfnStackSet()">Open clinics nationwide (StackSet)</button>
+  </div><div class="log" style="margin-top:10px">${logHtml()}</div></div>`;
+  return s;
+}
+function cfnDeploy(){buildLog=[{msg:'[CFN] Building City General Hospital stack...',cls:'info'},{msg:'[CFN] EmergencyRoom EC2: CREATE_COMPLETE',cls:'ok'},{msg:'[CFN] AmbulanceFleet ASG: CREATE_COMPLETE',cls:'ok'},{msg:'[CFN] PatientDB RDS: CREATE_COMPLETE',cls:'ok'},{msg:'[CFN] Stack: CREATE_COMPLETE',cls:'ok'}];rerender();}
+function cfnDrift(){buildLog=[{msg:'[CFN] Inspecting hospital against blueprint...',cls:'info'},{msg:'[CFN] EmergencyRoom: IN_SYNC ✓',cls:'ok'},{msg:'[CFN] ICU: DRIFTED — someone manually added 3 extra beds! MaxSize changed.',cls:'err'},{msg:'[CFN] Recommendation: update template or re-apply stack.',cls:'warn'}];rerender();}
+function cfnChangeset(){buildLog=[{msg:'[CFN] Proposed renovation: expand OR from 4 to 6 theatres',cls:'info'},{msg:'[CFN] Resources to modify: 1 (OperatingBlock)',cls:'ok'},{msg:'[CFN] No existing resources deleted. Safe to proceed.',cls:'ok'}];rerender();}
+function cfnStackSet(){buildLog=[{msg:'[CFN] StackSet: city-general-hospital',cls:'info'},{msg:'[CFN] Opening clinic: account 111111111111 / us-east-1 (New York)...',cls:'ok'},{msg:'[CFN] Opening clinic: account 222222222222 / ap-southeast-1 (Singapore)...',cls:'ok'},{msg:'[CFN] Opening clinic: account 333333333333 / eu-west-1 (Dublin)...',cls:'ok'},{msg:'[CFN] 3 clinics deployed simultaneously from one blueprint.',cls:'ok'}];rerender();}
+
+function rCdk(){
+  let s=panelHead('IaC · #8','CDK — The Hospital Design Software (CAD)',
+    'Define infra in Python/TypeScript/Java. Synthesizes to CloudFormation. CDK Pipelines.',
+    'CDK Pipelines: self-mutating CI/CD pipeline defined entirely in code');
+  s+=metaphor('Hospital CAD Software','CDK',
+    'Drawing hospital blueprints by hand is slow and error-prone. CDK is the architect\'s CAD software: describe your hospital in Python ("I need a 6-bed ICU with backup power and two operating theatres") and it generates the full 800-page technical blueprint (CloudFormation) automatically. Change your mind about the number of beds? One line of Python, then regenerate.');
+  s+=`<div class="sim-area">
+  <div class="log" style="max-height:120px;margin-bottom:10px">
+<div class="info">from aws_cdk import Stack, aws_ec2 as ec2, aws_rds as rds</div>
+<div class="info">class HospitalStack(Stack):</div>
+<div class="info">  def __init__(self, scope, id):</div>
+<div class="info">    vpc = ec2.Vpc(self, "HospitalVpc", max_azs=3)</div>
+<div class="info">    db  = rds.DatabaseInstance(self, "PatientDB",</div>
+<div class="info">      engine=rds.DatabaseInstanceEngine.POSTGRES,</div>
+<div class="info">      multi_az=True)  # always on for patient safety</div>
+  </div>
+  <div class="btn-row">
+    <button class="btn btn-primary" onclick="cdkSynth()">cdk synth (generate blueprint)</button>
+    <button class="btn btn-teal" onclick="cdkDiff()">cdk diff (what changes?)</button>
+    <button class="btn btn-amber" onclick="cdkDeploy()">cdk deploy (build it)</button>
+  </div><div class="log" style="margin-top:10px">${logHtml()}</div></div>`;
+  return s;
+}
+function cdkSynth(){buildLog=[{msg:'[CDK] Synthesizing HospitalStack...',cls:'info'},{msg:'[CDK] Generated CloudFormation template: 1,024 lines',cls:'ok'},{msg:'[CDK] Resources: VPC, RDS Multi-AZ, EC2×4, ASG, SG×3, IAM roles',cls:'ok'},{msg:'[CDK] cdk.out/ ready for inspection.',cls:'ok'}];rerender();}
+function cdkDiff(){buildLog=[{msg:'[CDK] Comparing to currently deployed hospital...',cls:'info'},{msg:'[CDK] ~ Update: ICU bed count 4 → 6 (PatientDB MaxConnections)',cls:'warn'},{msg:'[CDK] + Add: CloudWatchAlarm (ER wait time > 30 min)',cls:'ok'},{msg:'[CDK] No destructive changes. Safe to deploy.',cls:'ok'}];rerender();}
+function cdkDeploy(){buildLog=[{msg:'[CDK] Deploying HospitalStack...',cls:'info'},{msg:'[CDK] Uploading blueprint to S3...',cls:'info'},{msg:'[CDK] CloudFormation: UPDATE_COMPLETE',cls:'ok'},{msg:'[CDK] Output: ERLoadBalancerDNS = hospital-alb.amazonaws.com',cls:'ok'}];rerender();}
+
+function rSsm(){
+  let s=panelHead('IaC · #9','Systems Manager — The Hospital Operations Director',
+    'Patch, run commands, manage secrets, automate ops across fleets. OpsWorks replacement.',
+    'Parameter Store vs Secrets Manager: free vs $0.40/secret/month — know the difference');
+  s+=metaphor('The Hospital Operations Director','Systems Manager',
+    'The ops director (SSM) manages all 50 hospital branches simultaneously. When a new health regulation arrives, they push the updated hygiene protocol to every branch at once (Run Command). They keep every master key and safe combination locked in a secure vault (Parameter Store) — no nurse needs to know the pharmacy safe combination personally, they just request access through their badge (IAM role).');
+  s+=`<div class="sim-area"><div class="sim-title">Secure vault — Parameter Store</div>
+  ${ssmParams.map(p=>`<div class="row-item"><code style="font-size:11.5px;flex:1">${p.key}</code><span style="font-size:12px">${p.val}</span><span class="tag">${p.type}</span></div>`).join('')}
+  <div class="btn-row">
+    <button class="btn btn-primary" onclick="ssmRun()">Issue new hygiene protocol to all branches</button>
+    <button class="btn btn-amber" onclick="ssmPatch()">Apply regulatory patch baseline</button>
+    <button class="btn btn-teal" onclick="ssmAutomation()">Run emergency restart automation</button>
+  </div><div class="log" style="margin-top:10px">${logHtml()}</div></div>`;
+  return s;
+}
+function ssmRun(){buildLog=[{msg:'[SSM] Run Command: update-hygiene-protocol on 50 hospital branches',cls:'info'},{msg:'[SSM] Branch City General: SUCCESS',cls:'ok'},{msg:'[SSM] Branch Northside Clinic: SUCCESS',cls:'ok'},{msg:'[SSM] 50/50 branches updated. Zero non-compliant.',cls:'ok'}];rerender();}
+function ssmPatch(){buildLog=[{msg:'[SSM] Patch baseline: HIPAAComplianceBaseline',cls:'info'},{msg:'[SSM] Scanning 50 instances for missing patches...',cls:'info'},{msg:'[SSM] 12 instances non-compliant. Installing critical patches...',cls:'warn'},{msg:'[SSM] All 50 instances now HIPAA compliant.',cls:'ok'}];rerender();}
+function ssmAutomation(){buildLog=[{msg:'[SSM] Running: AWS-RestartPatientMonitoringService',cls:'info'},{msg:'[SSM] Step 1: verifyServiceRunning — found stalled process',cls:'warn'},{msg:'[SSM] Step 2: stopService — OK',cls:'ok'},{msg:'[SSM] Step 3: startService — OK',cls:'ok'},{msg:'[SSM] Automation complete. All patient monitors online.',cls:'ok'}];rerender();}
+
+function rSsmApp(){
+  let s=panelHead('IaC · #10','SSM App Manager — The Clinical Governance Board',
+    'Replaces deprecated OpsWorks. Groups resources into apps, tracks health, runs runbooks.',
+    'OpsWorks EOL: May 26 2024 — fully disabled. AWS recommends SSM App Manager.');
+  s+=corrBox('<b>OpsWorks is fully retired.</b> AWS OpsWorks Stacks, Chef Automate, and Puppet Enterprise all reached end of life by May 26, 2024. Console, API, CLI, and CloudFormation resources are disabled for all customers. <b>AWS officially recommends Systems Manager Application Manager as the replacement.</b> On DOP-C02 exam: if you see an OpsWorks scenario, the correct modern answer is SSM or AWS Config.');
+  s+=metaphor('The Clinical Governance Board','SSM Application Manager',
+    'OpsWorks was the old head chef\'s prescription pad (Chef/Puppet). It\'s been retired. The new Clinical Governance Board (SSM Application Manager) groups all hospital resources — ER, ICU, pharmacy, billing — into one unified health dashboard. When the ER shows amber (degraded), the board can trigger a remediation runbook with one click, without needing any special cookbook language.');
+  s+=`<div class="sim-area"><div class="sim-title">Clinical governance — hospital department health</div>
+  ${appMgrApps.map(a=>`<div class="row-item"><div style="flex:1"><div style="font-weight:500">${a.name}</div><div style="font-size:11px;color:var(--color-text-tertiary)">${a.stacks} stacks · ${a.healthy}/${a.stacks} healthy</div></div><span class="pill ${a.healthy===a.stacks?'pill-green':'pill-amber'}">${a.healthy===a.stacks?'All healthy':'Needs attention'}</span></div>`).join('')}
+  <div class="btn-row">
+    <button class="btn btn-primary" onclick="appMgrRunbook()">Trigger remediation runbook</button>
+    <button class="btn btn-amber" onclick="appMgrCompliance()">Check OpsCenter issues</button>
+  </div><div class="log" style="margin-top:10px">${logHtml()}</div></div>
+  <div class="sim-area"><div class="sim-title">OpsWorks → SSM migration guide</div>
+  <div class="info-grid">
+    <div class="info-card"><div class="info-card-title">OpsWorks Stacks → App Manager</div><div class="info-card-body">AWS migration script converts OpsWorks layers into SSM Application Manager application components.</div></div>
+    <div class="info-card"><div class="info-card-title">Chef cookbooks → SSM Documents</div><div class="info-card-body">Rewrite Chef recipes as SSM Automation documents or State Manager associations.</div></div>
+    <div class="info-card"><div class="info-card-title">Exam rule</div><div class="info-card-body">OpsWorks scenario on exam → answer is SSM Application Manager or AWS Config. OpsWorks is gone.</div></div>
+    <div class="info-card"><div class="info-card-title">State Manager</div><div class="info-card-body">Ensures instances stay in defined state — like the old Chef "convergence", but via SSM Documents.</div></div>
+  </div></div>`;
+  return s;
+}
+function appMgrRunbook(){buildLog=[{msg:'[SSM] Running runbook: RestartDegradedERService',cls:'info'},{msg:'[SSM] Target: er-dispatch application',cls:'info'},{msg:'[SSM] Step 1: CheckServiceHealth — DEGRADED',cls:'warn'},{msg:'[SSM] Step 2: RestartService — SUCCESS',cls:'ok'},{msg:'[SSM] Step 3: ValidateHealth — HEALTHY',cls:'ok'},{msg:'[SSM] Runbook complete. OpsCenter issue #4821 resolved.',cls:'ok'}];rerender();}
+function appMgrCompliance(){buildLog=[{msg:'[SSM] OpsCenter: 2 open issues detected',cls:'warn'},{msg:'[SSM] Issue #1: er-dispatch response time >4s (SLA breach)',cls:'warn'},{msg:'[SSM] Issue #2: billing-system TLS cert expires in 7 days',cls:'err'},{msg:'[SSM] Suggested runbook: RenewTLSCertificate — click to approve',cls:'info'}];rerender();}
+
+function rEcs(){
+  let s=panelHead('Compute · #11','ECS — The Isolation Ward System',
+    'Managed container orchestration. Task definitions, services, Fargate or EC2 launch type.',
+    'Blue/green with CodeDeploy: most common exam pattern for ECS container deployments');
+  s+=metaphor('The Isolation Ward System','ECS',
+    'Each infectious patient is treated in their own sealed isolation room (Docker container) so diseases don\'t spread. ECS is the ward manager who decides which nurse station (EC2/Fargate) handles which isolation room and how many rooms to open at once. If one room has a containment breach, only that room is sealed and replaced — the rest of the ward keeps running.');
+  s+=`<div class="sim-area"><div class="sim-title">Isolation ward — running patient containers (tasks)</div>
+  ${containers.map(c=>`<div class="row-item"><code style="font-size:11.5px;min-width:95px">${c.id}</code><span class="pill ${c.status==='running'?'pill-green':'pill-red'}">${c.status}</span><div class="progress-bar" style="margin:0 10px"><div class="progress-fill" style="width:${c.cpu}%;background:${c.cpu>70?'#C0392B':'#1A5276'}"></div></div><span style="font-size:12px;color:var(--color-text-tertiary)">${c.cpu}% capacity</span></div>`).join('')}
+  <div class="btn-row">
+    <button class="btn btn-primary" onclick="ecsScale()">Open new isolation room (+1 task)</button>
+    <button class="btn btn-danger" onclick="ecsKill()">Simulate containment breach (kill task)</button>
+    <button class="btn btn-gray" onclick="ecsRestart()">ECS auto-replaces room (self-heal)</button>
+  </div></div>`;
+  return s;
+}
+function ecsScale(){containers.push({id:'iso-ward-'+(containers.length+1),status:'running',cpu:Math.floor(Math.random()*40+10)});rerender();}
+function ecsKill(){if(containers.length>1){containers[0].status='breached';rerender();}}
+function ecsRestart(){containers.forEach(c=>c.status='running');rerender();}
+
+function rEks(){
+  let s=panelHead('Compute · #12','EKS — The International Hospital Network',
+    'Managed Kubernetes. Node groups, Helm, IRSA, pod autoscaling via CloudWatch.',
+    'IRSA: IAM Roles for Service Accounts — pod-level fine-grained permissions');
+  s+=metaphor('The International Hospital Network','EKS',
+    'EKS uses the global medical standard (Kubernetes) that every hospital in the world follows. A surgeon trained on this standard can walk into any hospital in any country and know exactly where the equipment is, how the workflow runs, and how to read the charts. You can also move your entire hospital system to a different country (cloud provider) without retraining all the staff.');
+  s+=`<div class="sim-area">
+  <div class="log" style="margin-bottom:10px">
+<div class="info">$ kubectl get pods -n hospital</div>
+<div class="ok">er-triage-5d8f9     1/1  Running  0  5m</div>
+<div class="ok">er-triage-7a2b1     1/1  Running  0  5m</div>
+<div class="ok">lab-processor-1     1/1  Running  0  3m</div>
+  </div>
+  <div class="btn-row">
+    <button class="btn btn-primary" onclick="eksRollout()">kubectl rollout (new protocol)</button>
+    <button class="btn btn-amber" onclick="eksHelm()">Helm deploy hospital-chart</button>
+    <button class="btn btn-teal" onclick="eksIRSA()">Configure IRSA (pod-level access)</button>
+  </div><div class="log" style="margin-top:10px">${logHtml()}</div></div>`;
+  return s;
+}
+function eksRollout(){buildLog=[{msg:'[K8s] Rolling update: er-triage Deployment with new protocol...',cls:'info'},{msg:'[K8s] er-triage-new-1: Running — vitals normal',cls:'ok'},{msg:'[K8s] er-triage-old-1: Terminated cleanly',cls:'warn'},{msg:'[K8s] 2/2 pods updated with new triage protocol.',cls:'ok'}];rerender();}
+function eksHelm(){buildLog=[{msg:'[Helm] Installing hospital-chart v3.1.0...',cls:'info'},{msg:'[Helm] ConfigMap (ward rules): created',cls:'ok'},{msg:'[Helm] Deployment (er-triage): created',cls:'ok'},{msg:'[Helm] DEPLOYED. All hospital services live.',cls:'ok'}];rerender();}
+function eksIRSA(){buildLog=[{msg:'[IRSA] Creating OIDC provider for hospital EKS cluster...',cls:'info'},{msg:'[IRSA] Creating IAM role: lab-results-s3-reader',cls:'ok'},{msg:'[IRSA] Binding to service account: lab-processor-sa',cls:'ok'},{msg:'[IRSA] lab-processor pod can now read S3 imaging archive without hardcoded credentials.',cls:'ok'}];rerender();}
+
+function rLambda(){
+  let s=panelHead('Compute · #13','Lambda — The On-Call Specialist',
+    'Serverless functions. Versions, aliases, canary traffic shifting. Pay per 1ms.',
+    'Canary via aliases: route 10% to v2, 90% to v1 — no infrastructure change needed');
+  s+=metaphor('The On-Call Specialist','Lambda',
+    'The hospital doesn\'t keep a neurosurgeon on-site 24/7 — that would be expensive and wasteful. Instead, they call one in when needed (Lambda). The specialist arrives, performs the procedure, and goes home. You pay only for the time they were in the hospital. If 1,000 patients simultaneously need the same specialist, 1,000 specialists are instantly summoned from the on-call roster — no waiting list.');
+  s+=`<div class="sim-area"><div class="sim-title">On-call specialist invocations</div>
+  <div class="metric-row">
+    <div class="metric"><div class="metric-val" id="lam-inv">${lamInv}</div><div class="metric-lbl">Specialists called</div></div>
+    <div class="metric"><div class="metric-val" id="lam-dur">—</div><div class="metric-lbl">Procedure time</div></div>
+    <div class="metric"><div class="metric-val" id="lam-cost">$${lamCost.toFixed(7)}</div><div class="metric-lbl">On-call cost</div></div>
+  </div>
+  <div class="btn-row">
+    <button class="btn btn-primary" onclick="invokeLambda('ProcessLabResult')">ProcessLabResult</button>
+    <button class="btn btn-amber" onclick="invokeLambda('SendCriticalAlert')">SendCriticalAlert</button>
+    <button class="btn btn-teal" onclick="lambdaAlias()">Deploy canary protocol (10% → new version)</button>
+  </div></div>`;
+  return s;
+}
+function invokeLambda(fn){
+  lamInv++;const dur=80+Math.floor(Math.random()*400);lamCost+=0.0000002;
+  const inv=document.getElementById('lam-inv');
+  const durEl=document.getElementById('lam-dur');
+  const cost=document.getElementById('lam-cost');
+  if(inv)inv.textContent=lamInv;
+  if(durEl)durEl.textContent=dur+'ms';
+  if(cost)cost.textContent='$'+lamCost.toFixed(7);
+  addTrail('Lambda','Invoke',{fn,dur});
+}
+function lambdaAlias(){buildLog=[{msg:'[Lambda] Publishing new specialist protocol: v2',cls:'info'},{msg:'[Lambda] Updating alias: specialist-live',cls:'info'},{msg:'[Lambda] specialist-live → 90% v1 (proven), 10% v2 (new)',cls:'ok'},{msg:'[Lambda] Monitoring patient outcomes for canary cohort...',cls:'ok'},{msg:'[Lambda] Outcomes excellent. Shifting 100% to new protocol.',cls:'ok'}];rerender();}
+
+function rAsg(){
+  let s=panelHead('Compute · #14','Auto Scaling — The On-Call Staffing Agency',
+    'EC2 Auto Scaling. Target tracking, step, scheduled. Lifecycle hooks for instance prep.',
+    'Lifecycle hooks: pause launch/terminate — run bootstrap scripts before going live');
+  s+=metaphor('The On-Call Staffing Agency','Auto Scaling',
+    'Monday mornings are quiet. Saturday nights in the ER are chaos. The staffing agency (Auto Scaling) watches the patient queue length (CPU metric) and calls in extra nurses and doctors when the ER gets busy, then sends them home once things calm down. Lifecycle hooks are like the agency saying: "Wait in the orientation room (Pending:Wait) while we run your background check and badge you in before you touch any patients."');
+  s+=`<div class="sim-area">
+  <div class="metric-row">
+    <div class="metric"><div class="metric-val" id="asg-inst">${instances}</div><div class="metric-lbl">On-duty staff (instances)</div></div>
+    <div class="metric"><div class="metric-val">${Math.floor(35+instances*5)}%</div><div class="metric-lbl">Avg ER capacity</div></div>
+  </div>
+  <div class="btn-row">
+    <button class="btn btn-danger" onclick="simulateSpike()">Saturday night rush (scale out)</button>
+    <button class="btn btn-gray" onclick="simulateQuiet()">Monday 6 AM quiet (scale in)</button>
+    <button class="btn btn-teal" onclick="lifecycleHook()">Staff orientation hook (lifecycle)</button>
+  </div><div class="log" style="margin-top:10px">${logHtml()}</div></div>`;
+  return s;
+}
+function simulateSpike(){
+  buildLog=[
+    {msg:'[ASG] ER capacity alarm: 85% > threshold 70%',cls:'warn'},
+    {msg:'[ASG] Calling in extra staff: 2 → 5 on duty',cls:'info'},
+    {msg:'[ASG] 3 new staff in orientation (lifecycle hook triggered)',cls:'ok'},
+    {msg:'[ASG] Hook: running badge-and-brief script...',cls:'ok'},
+    {msg:'[ASG] All 5 staff ACTIVE. ER capacity: 41%',cls:'ok'}
+  ];
+  instances=5;rerender();
+}
+function simulateQuiet(){
+  buildLog=[
+    {msg:'[ASG] ER capacity: 8% < threshold 20% — quiet period',cls:'info'},
+    {msg:'[ASG] Releasing staff: 5 → 2 on duty',cls:'info'},
+    {msg:'[ASG] Minimum safe staffing level maintained: 2',cls:'ok'}
+  ];
+  instances=2;rerender();
+}
+function lifecycleHook(){
+  buildLog=[
+    {msg:'[ASG] New staff member arriving: i-nurse1234',cls:'info'},
+    {msg:'[ASG] Lifecycle hook: EC2_INSTANCE_LAUNCHING',cls:'info'},
+    {msg:'[ASG] Staff in Pending:Wait — orientation in progress',cls:'ok'},
+    {msg:'[ASG] Running: install-badge.sh, join-er-network.sh...',cls:'ok'},
+    {msg:'[ASG] complete-lifecycle-action: CONTINUE',cls:'ok'},
+    {msg:'[ASG] Staff member now InService — cleared to treat patients.',cls:'ok'}
+  ];
+  rerender();
+}
+
+function rCw(){
+  const ac=alarmState==='ok'?'alarm-ok':alarmState==='warn'?'alarm-warn':'alarm-crit';
+  const at=alarmState==='ok'?'All hospital systems normal — no alarms active':'Critical patients detected! CloudWatch alarm TRIGGERED — paging on-call team.';
+  let s=panelHead('Monitoring · #15','CloudWatch — The Hospital Command Centre',
+    'Metrics, alarms, Logs Insights, Container Insights, dashboards, anomaly detection.',
+    'Contributor Insights: find top error sources — e.g. which ward generates most alerts');
+  s+=metaphor('The Hospital Command Centre','CloudWatch',
+    'The central command screen (CloudWatch) shows every live metric across the hospital: patients/hour, ICU occupancy, average wait time, medication errors. Anomaly detection draws a "normal band" for each metric — if the ER wait time suddenly jumps outside the band at 2 AM, an alarm fires and the on-call consultant\'s pager goes off. Logs Insights answers: "Which doctor ordered the most pain medication yesterday?"');
+  s+=`<div class="sim-area">
+  <div class="vitals-strip">
+    <div class="vital"><div class="vital-val">${cwMetrics.patients}</div><div class="vital-lbl">Patients today</div></div>
+    <div class="vital"><div class="vital-val" style="color:${cwMetrics.critical>0?'#C0392B':'inherit'}">${cwMetrics.critical}</div><div class="vital-lbl">Critical</div></div>
+    <div class="vital"><div class="vital-val">${cwMetrics.waitTime}m</div><div class="vital-lbl">Avg wait</div></div>
+  </div>
+  <div class="alarm ${ac}"><span class="alarm-dot" style="background:${alarmState==='ok'?'#1E8449':alarmState==='warn'?'#784212':'#C0392B'}"></span>${at}</div>
+  <div class="btn-row">
+    <button class="btn btn-primary" onclick="admitPatient('Chest pain')">Admit patient (generate metric)</button>
+    <button class="btn btn-danger" onclick="simulateCritical()">Patient goes critical (trigger alarm)</button>
+    <button class="btn btn-gray" onclick="resetMetrics()">Reset all metrics</button>
+  </div></div>`;
+  return s;
+}
+function simulateCritical(){cwMetrics.critical+=2;cwMetrics.waitTime=47;checkAlarm();rerender();}
+function resetMetrics(){cwMetrics={patients:0,critical:0,waitTime:14};alarmState='ok';rerender();}
+
+function rXray(){
+  let s=panelHead('Monitoring · #16','X-Ray — The Diagnostic Imaging Suite',
+    'Distributed tracing. Service map, trace analysis, groups, annotations, insights.',
+    'X-Ray groups: filter traces by annotation e.g. patient=critical — common exam scenario');
+  s+=metaphor('The Diagnostic Imaging Suite','X-Ray',
+    'A patient\'s family complains their loved one waited 47 minutes and nobody explained why. X-Ray is the MRI and CT scanner for your software: it traces the exact journey of every request through the hospital system — 2 min registration → 18 min lab results → 20 min radiologist → 7 min doctor review. You can see exactly which department was the bottleneck, and whether it\'s always slow or only on night shifts.');
+  s+=`<div class="sim-area">
+  <button class="btn btn-primary" onclick="tracePatient()" style="margin-bottom:14px">Trace patient journey #${patientCount+1}</button>
+  ${traces.length?`<div>
+    ${traces.map(t=>`<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;font-size:13px">
+      <div style="width:140px;color:var(--color-text-secondary);flex-shrink:0">${t.step}</div>
+      <div class="progress-bar" style="flex:1"><div class="progress-fill" style="width:${Math.min(100,t.ms/30)}%;background:${t.ms>500?'#C0392B':t.ms>200?'#E67E22':'#1E8449'}"></div></div>
+      <div style="width:60px;text-align:right;font-weight:700;font-size:12px;color:${t.ms>500?'#C0392B':t.ms>200?'#784212':'#1E8449'}">${t.ms}ms</div>
+    </div>`).join('')}
+    <div style="font-size:12px;color:var(--color-text-tertiary);margin-top:6px;padding-top:8px;border-top:1px solid var(--color-border-tertiary)">
+      Total journey: ${traces.reduce((a,t)=>a+t.ms,0)}ms &nbsp;·&nbsp; Bottleneck: <b>${[...traces].sort((a,b)=>b.ms-a.ms)[0].step}</b>
+    </div>
+  </div>`:'<span style="font-size:13px;color:var(--color-text-tertiary)">Click above to trace a patient\'s journey through the hospital system.</span>'}
+  </div>`;
+  return s;
+}
+function tracePatient(){
+  const steps=['Patient registration','Triage assessment','Lab blood tests','Radiology (CT scan)','Doctor review','Pharmacy dispensing'];
+  traces=steps.map(s=>({step:s,ms:s==='Lab blood tests'&&Math.random()<0.5?580+Math.floor(Math.random()*300):s==='Radiology (CT scan)'&&Math.random()<0.3?720+Math.floor(Math.random()*200):40+Math.floor(Math.random()*180)}));
+  rerender();
+}
+
+function rEb(){
+  let s=panelHead('Monitoring · #17','EventBridge — The Hospital PA System',
+    'Event bus routing 200+ AWS services to targets. Schema registry, Pipes, scheduled rules.',
+    'EventBridge Pipes: point-to-point SQS/Kinesis → Lambda with filtering, no custom code');
+  s+=metaphor('The Hospital PA System','EventBridge',
+    'When a patient goes critical (event), the PA system (EventBridge) simultaneously broadcasts to: the crash team, the chaplain, the ICU nurse station, and the billing department — all in one announcement, instantly. No one has to manually call each department. You can also schedule announcements: "Remind all shift leads to submit staffing reports at 6 PM."');
+  s+=`<div class="sim-area">
+  <div class="btn-row" style="margin-bottom:14px">
+    <button class="btn btn-primary" onclick="admitPatient('Cardiac arrest')">Admit patient (fire event)</button>
+    <button class="btn btn-danger" onclick="fireEvt('Code Blue','Patient in cardiac arrest — Bay 4')">Broadcast CODE BLUE</button>
+    <button class="btn btn-teal" onclick="scheduleEvent()">Scheduled shift-handover reminder</button>
+  </div>
+  <div class="sim-title">PA system broadcast log</div>
+  <div>${events.slice(0,5).map(e=>`<div class="row-item"><span class="pill ${e.type==='Code Blue'?'pill-red':e.type==='schedule'?'pill-purple':'pill-blue'}">${e.type}</span><div style="flex:1;font-size:13px">${e.msg}</div><span style="font-size:11px;color:var(--color-text-tertiary)">${e.time}</span></div>`).join('')||'<div style="font-size:13px;color:var(--color-text-tertiary);padding:8px">No broadcasts yet — admit a patient or fire an alert.</div>'}
+  </div></div>`;
+  return s;
+}
+function fireEvt(t,m){addEvent(m,t);rerender();}
+function scheduleEvent(){addEvent('Scheduled rule fired: shift-handover-reminder → all ward charge nurses notified','schedule');rerender();}
+
+function rConfig(){
+  let s=panelHead('Governance · #18','AWS Config — The Hospital Accreditation Inspector',
+    'Tracks all resource config changes. Config rules, conformance packs, auto-remediation.',
+    'Conformance packs: e.g. HIPAA operational best practices — single CloudFormation template');
+  s+=metaphor('The Hospital Accreditation Inspector','AWS Config',
+    'The accreditation inspector (AWS Config) visits every day and checks a specific rulebook: Are all MRI machines within calibration date? Is PHI data encrypted? Are all fire exits clear? Every check is timestamped and logged. If something drifts (a server loses its encryption config), Config notices immediately and can automatically trigger a remediation procedure through SSM Automation — like an auto-repair crew that fixes the fire exit before the inspector even leaves.');
+  s+=`<div class="sim-area">
+  ${configRules.map((r,i)=>`<div class="row-item"><span class="pill ${r.status==='ok'?'pill-green':'pill-amber'}">${r.status==='ok'?'COMPLIANT':'NON-COMPLIANT'}</span><div style="flex:1">${r.name}</div>${r.status!=='ok'?`<button class="btn btn-gray" style="padding:4px 10px;font-size:12px" onclick="fixRule(${i})">Auto-remediate</button>`:''}</div>`).join('')}
+  <div class="btn-row" style="margin-top:10px">
+    <button class="btn btn-amber" onclick="driftConfig()">Simulate accreditation failure (drift)</button>
+    <button class="btn btn-teal" onclick="configHistory()">View config timeline (time travel)</button>
+  </div><div class="log" style="margin-top:10px">${logHtml()}</div></div>`;
+  return s;
+}
+function driftConfig(){configRules[1].status='drift';configRules[2].status='drift';rerender();}
+function fixRule(i){
+  configRules[i].status='ok';
+  buildLog=[{msg:`[Config] Non-compliance detected: ${configRules[i].name}`,cls:'info'},{msg:`[Config] Triggering SSM Automation: AWS-ConfigRemediation`,cls:'ok'},{msg:`[Config] Issue resolved. Rule now COMPLIANT.`,cls:'ok'}];
+  rerender();
+}
+function configHistory(){buildLog=[{msg:'[Config] Fetching configuration timeline for ICU-Server-01...',cls:'info'},{msg:'[Config] 2026-04-01: PHI encryption = enabled ✓',cls:'ok'},{msg:'[Config] 2026-04-03: SecurityGroup changed — who authorised this?',cls:'warn'},{msg:'[Config] 2026-04-05: PHI encryption = DISABLED — Config alarm fired!',cls:'err'},{msg:'[Config] 2026-04-05: Auto-remediation restored encryption within 2 minutes.',cls:'ok'}];rerender();}
+
+function rTrail(){
+  let s=panelHead('Governance · #19','CloudTrail — The Hospital CCTV & Audit System',
+    'Logs every AWS API call: who, what, when, from where. 90-day default. S3 for long-term.',
+    'CloudTrail Insights: auto-detects unusual API call volume spikes — exam favourite');
+  s+=metaphor('The Hospital CCTV & Audit System','CloudTrail',
+    'Every action in the hospital is recorded on CCTV with a timestamp (CloudTrail): who accessed a patient\'s records, who changed a medication order, who unlocked the pharmacy after hours. If a patient complaint comes in — or worse, a malpractice investigation — you rewind the tape to the exact second and see who did what. CloudTrail Insights sets motion-detection alarms: if someone accesses 200 patient files in 10 minutes, the security office is alerted immediately.');
+  s+=`<div class="sim-area">
+  ${trailLog.length?trailLog.map(t=>`<div class="row-item" style="flex-direction:column;align-items:flex-start;gap:3px">
+    <div style="display:flex;gap:8px;align-items:center;width:100%">
+      <span class="tag">${t.svc}</span>
+      <span style="font-weight:600;font-size:13px">${t.action}</span>
+      <span style="margin-left:auto;font-size:11px;color:var(--color-text-tertiary)">${t.time}</span>
+    </div>
+    <div style="font-size:11.5px;color:var(--color-text-tertiary)">${t.user} &nbsp;·&nbsp; ${t.detail}</div>
+  </div>`).join(''):`<div style="font-size:13px;color:var(--color-text-tertiary);padding:8px">No audit trail yet. Interact with other services — every action is recorded here.</div>`}
+  <div class="btn-row" style="margin-top:10px">
+    <button class="btn btn-danger" onclick="trailInsight()">Trigger Insights anomaly alert</button>
+  </div><div class="log" style="margin-top:10px">${logHtml()}</div></div>`;
+  return s;
+}
+function trailInsight(){buildLog=[{msg:'[CloudTrail Insights] Unusual access pattern detected!',cls:'warn'},{msg:'[Insights] GetPatientRecord called 312× in 5 min (baseline: 4/hr)',cls:'err'},{msg:'[Insights] Source IP: 185.220.101.x — not a known hospital IP',cls:'err'},{msg:'[Insights] HIPAA breach investigation triggered → SNS → Security Officer',cls:'ok'},{msg:'[Insights] Session suspended pending review.',cls:'ok'}];rerender();}
+
+function rIam(){
+  let s=panelHead('Governance · #20','IAM — The Hospital Badge & Access Control System',
+    'Roles, policies, permission boundaries, SCPs, cross-account access, trust policies.',
+    'SCPs: org-wide guardrails — even the hospital CEO cannot override a no-delete rule');
+  s+=metaphor('The Hospital Badge System','IAM',
+    'Not everyone gets every door. Nurses can access wards and patient records. Radiologists can access imaging suites and labs. The Chief of Medicine has master access to everything. IAM is the badge-programming system that defines exactly which doors each badge opens. SCPs are like a hospital regulation set by the national health authority — even the local CEO cannot override "no one may access the pharmacy without a valid prescription badge", ever.');
+  s+=`<div class="sim-area">
+  ${iamRoles.map(r=>`<div class="row-item"><div style="font-weight:600;min-width:100px">${r.name}</div><div class="tag-row" style="flex:1;margin:0">${r.perms.map(p=>`<span class="tag">${p}</span>`).join('')}</div></div>`).join('')}
+  <div class="btn-row" style="margin-top:10px">
+    <button class="btn btn-danger" onclick="iamDeny()">Nurse tries to access pharmacy (DENY)</button>
+    <button class="btn btn-success" onclick="iamAllow()">Chief accesses pharmacy (ALLOW)</button>
+    <button class="btn btn-purple" onclick="iamSCP()">SCP blocks ALL patient record deletion</button>
+  </div><div class="log" style="margin-top:10px">${logHtml()}</div></div>`;
+  return s;
+}
+function iamDeny(){
+  buildLog=[
+    {msg:'[IAM] User: Nurse → Resource: pharmacy-safe',cls:'info'},
+    {msg:'[IAM] Evaluating identity-based policy for Nurse role...',cls:'info'},
+    {msg:'[IAM] DENY — "pharmacy" not in Nurse permission list',cls:'err'},
+    {msg:'[IAM] Access denied. Incident logged to CloudTrail automatically.',cls:'err'}
+  ];
+  addTrail('IAM','AssumeRole',{user:'Nurse',resource:'pharmacy',result:'DENY'});
+  rerender();
+}
+function iamAllow(){
+  buildLog=[
+    {msg:'[IAM] User: Chief of Medicine → Resource: pharmacy-safe',cls:'info'},
+    {msg:'[IAM] Policy evaluation: ALLOW (admin permission)',cls:'ok'},
+    {msg:'[IAM] Access granted. Entry logged to CloudTrail.',cls:'ok'}
+  ];
+  addTrail('IAM','AssumeRole',{user:'ChiefOfMedicine',resource:'pharmacy',result:'ALLOW'});
+  rerender();
+}
+function iamSCP(){
+  buildLog=[
+    {msg:'[SCP] Organisation policy: DenyPatientRecordDeletion',cls:'info'},
+    {msg:'[SCP] Chief of Medicine attempts: DeletePatientRecord ID-88291',cls:'warn'},
+    {msg:'[SCP] DENY — SCP overrides all identity-based policies including admin',cls:'err'},
+    {msg:'[SCP] HIPAA requires 7-year retention. SCP enforces this globally.',cls:'ok'},
+    {msg:'[SCP] SCPs are evaluated BEFORE any identity policy in IAM.',cls:'ok'}
+  ];
+  rerender();
+}
+
+function rR53(){
+  let s=panelHead('Networking · #21','Route 53 — The Hospital Directory & Ambulance Dispatch',
+    'DNS + health checks. Weighted, latency, failover, geolocation, multivalue routing.',
+    'Active-active vs active-passive failover — very common DOP-C02 scenario question');
+  s+=metaphor('The Ambulance Dispatch Centre','Route 53',
+    'When an ambulance (user request) needs to reach the hospital, the dispatch centre (Route 53) looks up which hospital is nearest (latency routing), or which is still open (health check), or which has the most capacity (weighted routing). If City General Hospital goes offline (fails health check), all ambulances are instantly rerouted to St. Mary\'s backup hospital — without any patient or paramedic noticing the switch.');
+  s+=`<div class="sim-area">
+  ${r53Records.map(r=>`<div class="row-item"><code style="font-size:11.5px;min-width:130px">${r.name}</code><span class="tag">${r.type}</span><div style="flex:1;font-size:12px;color:var(--color-text-secondary);padding:0 10px">${r.target}</div><span class="pill ${r.health==='healthy'?'pill-green':'pill-red'}">${r.health}</span></div>`).join('')}
+  <div class="btn-row" style="margin-top:10px">
+    <button class="btn btn-danger" onclick="r53Failover()">City General goes offline (failover)</button>
+    <button class="btn btn-primary" onclick="r53Weighted()">Split ambulances (weighted A/B)</button>
+    <button class="btn btn-gray" onclick="r53Restore()">Restore City General</button>
+  </div><div class="log" style="margin-top:10px">${logHtml()}</div></div>
+  <div class="sim-area"><div class="sim-title">Routing policies cheat sheet (exam tip)</div>
+  <div class="info-grid">
+    <div class="info-card"><div class="info-card-title">Weighted routing</div><div class="info-card-body">Send 80% of ambulances to main hospital, 20% to new wing for canary testing.</div></div>
+    <div class="info-card"><div class="info-card-title">Latency routing</div><div class="info-card-body">Route each ambulance to whichever hospital is geographically fastest to reach.</div></div>
+    <div class="info-card"><div class="info-card-title">Failover routing</div><div class="info-card-body">Active/passive: main hospital primary, backup only receives traffic if primary fails health check.</div></div>
+    <div class="info-card"><div class="info-card-title">Geolocation routing</div><div class="info-card-body">Patients in Indonesia → Singapore hospital. Patients in Ireland → Dublin hospital.</div></div>
+  </div></div>`;
+  return s;
+}
+function r53Failover(){r53Records[0].health='unhealthy';buildLog=[{msg:'[R53] Health check FAIL: hospital.com (203.0.113.10) — City General offline',cls:'err'},{msg:'[R53] Failover policy: all ambulances → dr-backup.hospital.com',cls:'warn'},{msg:'[R53] DNS TTL: 60s. Rerouting complete.',cls:'ok'},{msg:'[R53] Zero patients stranded. Seamless switchover.',cls:'ok'}];rerender();}
+function r53Weighted(){buildLog=[{msg:'[R53] Weighted routing: testing new ER triage system',cls:'info'},{msg:'[R53] 80% of ambulances → hospital.com (proven system)',cls:'ok'},{msg:'[R53] 20% of ambulances → new-wing.hospital.com (new system)',cls:'ok'},{msg:'[R53] Gradually increase new-wing weight as confidence grows.',cls:'ok'}];rerender();}
+function r53Restore(){r53Records[0].health='healthy';buildLog=[{msg:'[R53] Health check PASS: hospital.com restored. Routing normalised.',cls:'ok'}];rerender();}
+
+function rElb(){
+  let s=panelHead('Networking · #22','Elastic Load Balancer — The Hospital Triage Desk',
+    'ALB (L7 path routing), NLB (L4 TCP/UDP ultra-low latency), GWLB (inline appliances).',
+    'ALB + ECS blue/green via CodeDeploy: #1 exam container deployment pattern');
+  s+=metaphor('The Triage Desk','Elastic Load Balancer',
+    'Hundreds of patients arrive in the ER at once. The triage nurse (ELB) at the front desk directs each patient to the least-busy doctor station. If a doctor collapses (unhealthy instance), the triage nurse immediately stops sending patients to that station and redirects everyone to the remaining doctors. An ALB triage nurse can route: chest pain patients → cardiac ward, broken bones → orthopaedics, children → paediatrics (path-based routing).');
+  s+=`<div class="sim-area"><div class="sim-title">Doctor stations (target group)</div>
+  ${elbTargets.map(t=>`<div class="row-item"><code style="font-size:11.5px;min-width:75px">${t.id}</code><span class="tag">${t.zone}</span><span class="pill ${t.health==='healthy'?'pill-green':'pill-red'}">${t.health}</span><div class="progress-bar" style="margin:0 10px"><div class="progress-fill" style="width:${Math.min(100,t.req/2)}%;background:#1A5276"></div></div><span style="font-size:12px;color:var(--color-text-tertiary)">${t.req} patients/hr</span></div>`).join('')}
+  <div class="btn-row" style="margin-top:10px">
+    <button class="btn btn-primary" onclick="elbTraffic()">Admit 200 new patients</button>
+    <button class="btn btn-danger" onclick="elbKill()">Doctor goes down (fail target)</button>
+    <button class="btn btn-gray" onclick="elbHeal()">Restore all stations</button>
+  </div><div class="log" style="margin-top:10px">${logHtml()}</div></div>
+  <div class="sim-area"><div class="sim-title">ALB vs NLB vs GWLB — choose the right triage desk</div>
+  <div class="info-grid">
+    <div class="info-card"><div class="info-card-title">ALB (Layer 7)</div><div class="info-card-body">/cardiac → cardiac ward, /ortho → orthopaedics. Best for HTTP microservices.</div></div>
+    <div class="info-card"><div class="info-card-title">NLB (Layer 4)</div><div class="info-card-body">Ultra-low latency, static IP — like a direct hotline number for the trauma team. Best for real-time systems.</div></div>
+    <div class="info-card"><div class="info-card-title">GWLB (Layer 3)</div><div class="info-card-body">Routes traffic through security scanners (3rd-party firewalls) before it reaches any ward.</div></div>
+    <div class="info-card"><div class="info-card-title">Sticky sessions</div><div class="info-card-body">Keep a patient with the same doctor throughout their visit — stateful application pattern.</div></div>
+  </div></div>`;
+  return s;
+}
+function elbTraffic(){
+  const h=elbTargets.filter(t=>t.health==='healthy').length;
+  elbTargets.forEach(t=>{if(t.health==='healthy')t.req+=Math.floor(200/h);});
+  buildLog=[{msg:`[ELB] 200 patients distributed across ${h} healthy stations.`,cls:'ok'},{msg:`[ELB] Round-robin: ~${Math.floor(200/h)} patients per station.`,cls:'ok'}];
+  rerender();
+}
+function elbKill(){
+  elbTargets[0].health='unhealthy';
+  buildLog=[{msg:'[ELB] Health check FAIL: '+elbTargets[0].id+' — doctor unavailable',cls:'err'},{msg:'[ELB] Removing station from triage rotation.',cls:'warn'},{msg:'[ELB] All patients now routed to 2 remaining healthy stations.',cls:'ok'}];
+  rerender();
+}
+function elbHeal(){
+  elbTargets.forEach(t=>{t.health='healthy';t.req=130+Math.floor(Math.random()*40);});
+  buildLog=[{msg:'[ELB] All 3 doctor stations healthy and accepting patients.',cls:'ok'}];
+  rerender();
+}
+
+function rSqs(){
+  let s=panelHead('Networking · #23','SQS — The Patient Waiting Room',
+    'Standard (at-least-once) and FIFO (exactly-once, ordered) queues. DLQ, visibility timeout.',
+    'Long polling WaitTimeSeconds=20: reduces empty polls, cuts costs — common exam choice');
+  s+=metaphor('The Patient Waiting Room','SQS',
+    'Patients don\'t walk directly into the OR — they sit in the waiting room (SQS). Doctors pull the next patient from the waiting room only when they\'re ready. If the hospital is overwhelmed, 500 patients wait safely in the queue rather than collapsing the system. A patient who can\'t be treated after 3 attempts (max retries) is moved to the specialist waiting area (Dead Letter Queue) for a senior doctor to investigate personally.');
+  s+=`<div class="sim-area">
+  <div class="metric-row">
+    <div class="metric"><div class="metric-val">${sqsQueue.length}</div><div class="metric-lbl">Patients waiting</div></div>
+    <div class="metric"><div class="metric-val">${sqsMsgCount}</div><div class="metric-lbl">Total admissions</div></div>
+  </div>
+  <div style="max-height:120px;overflow-y:auto;margin-bottom:10px">
+    ${sqsQueue.slice(0,5).map(m=>`<div class="row-item"><span class="pill pill-blue">waiting</span><div style="flex:1;font-size:13px">${m.msg}</div><span style="font-size:11px;color:var(--color-text-tertiary)">visibility: ${m.vis}s</span></div>`).join('')||'<div style="font-size:13px;color:var(--color-text-tertiary);padding:8px">Waiting room empty.</div>'}
+  </div>
+  <div class="btn-row">
+    <button class="btn btn-primary" onclick="sqsSend()">Register 3 new patients</button>
+    <button class="btn btn-success" onclick="sqsProcess()">Doctor calls next patient</button>
+    <button class="btn btn-danger" onclick="sqsDLQ()">Untreatable patient → specialist DLQ</button>
+  </div><div class="log" style="margin-top:10px">${logHtml()}</div></div>
+  <div class="sim-area"><div class="sim-title">SQS concepts mapped to the hospital</div>
+  <div class="info-grid">
+    <div class="info-card"><div class="info-card-title">Visibility timeout</div><div class="info-card-body">Patient is "with doctor" — removed from the visible queue but not deleted until treatment confirmed complete.</div></div>
+    <div class="info-card"><div class="info-card-title">DLQ (Dead Letter Queue)</div><div class="info-card-body">After 3 failed treatment attempts, patient moved to specialist waiting area for senior investigation.</div></div>
+    <div class="info-card"><div class="info-card-title">FIFO queue</div><div class="info-card-body">Surgical procedures done in exact booking order — critical for prescriptions and billing sequences.</div></div>
+    <div class="info-card"><div class="info-card-title">Long polling</div><div class="info-card-body">Doctor waits at the desk for up to 20 seconds for a patient — far better than checking the room every second.</div></div>
+  </div></div>`;
+  return s;
+}
+function sqsSend(){
+  const conditions=['Chest pain','Broken arm','Appendicitis'];
+  for(let i=0;i<3;i++){sqsMsgCount++;sqsQueue.unshift({msg:'Patient #'+sqsMsgCount+': '+conditions[i],vis:30});}
+  buildLog=[{msg:'[SQS] 3 patients registered. Waiting room depth: '+sqsQueue.length,cls:'ok'}];
+  rerender();
+}
+function sqsProcess(){
+  if(sqsQueue.length>0){
+    const m=sqsQueue.pop();
+    buildLog=[{msg:'[SQS] Doctor called: '+m.msg,cls:'info'},{msg:'[SQS] Treatment in progress...',cls:'ok'},{msg:'[SQS] Treatment complete. Patient discharged (DeleteMessage). Remaining: '+sqsQueue.length,cls:'ok'}];
+  } else {
+    buildLog=[{msg:'[SQS] Waiting room empty. Doctor on standby (long polling active).',cls:'warn'}];
+  }
+  rerender();
+}
+function sqsDLQ(){
+  buildLog=[
+    {msg:'[SQS] Patient failed treatment 3 times (maxReceiveCount=3)',cls:'err'},
+    {msg:'[SQS] Transferring to specialist waiting area (DLQ: er-patients-dlq)',cls:'warn'},
+    {msg:'[SQS] CloudWatch alarm: DLQ depth > 0 → SNS alert → Chief of Medicine paged',cls:'ok'},
+    {msg:'[SQS] Senior specialist must investigate root cause.',cls:'info'}
+  ];
+  rerender();
+}
+
+function rSns(){
+  let s=panelHead('Networking · #24','SNS — The Hospital Emergency Broadcast System',
+    'Pub/Sub: one message fans out to email, SMS, SQS, Lambda, HTTP. Message filtering.',
+    'Message filtering: subscribers only receive messages matching their attribute — exam favourite');
+  s+=metaphor('The Hospital Emergency Broadcast System','SNS',
+    'The charge nurse picks up the intercom (SNS) and broadcasts "Code Blue — Bay 4!". Simultaneously and instantly: the crash team races to Bay 4, the chaplain is paged, the on-call consultant is texted, and the ICU readies a bed. One broadcast, many independent listeners. Message filtering means the pharmacy only hears medication-related codes — not every single hospital announcement clutters their system.');
+  s+=`<div class="sim-area">
+  ${snsTopics.map(t=>`<div class="row-item" style="flex-direction:column;align-items:flex-start;gap:5px">
+    <div style="font-weight:600;font-size:13px">Topic: ${t.name}</div>
+    <div class="tag-row">${t.subs.map(s=>`<span class="tag">${s}</span>`).join('')}</div>
+  </div>`).join('')}
+  <div class="btn-row" style="margin-top:10px">
+    <button class="btn btn-danger" onclick="snsPublish('critical-alerts','Code Blue — patient in cardiac arrest Bay 4')">Broadcast Code Blue</button>
+    <button class="btn btn-primary" onclick="snsPublish('lab-results-ready','Patient #8821 lab panel complete')">Lab results ready</button>
+    <button class="btn btn-purple" onclick="snsFanout()">SNS → SQS fan-out pattern</button>
+  </div><div class="log" style="margin-top:10px">${logHtml()}</div></div>
+  <div class="sim-area"><div class="sim-title">SNS vs SQS — the classic exam question</div>
+  <div class="info-grid">
+    <div class="info-card"><div class="info-card-title">SNS (push, fan-out)</div><div class="info-card-body">One Code Blue broadcast reaches ALL departments at once. Fire and forget — if a department's system is offline, the message is lost.</div></div>
+    <div class="info-card"><div class="info-card-title">SQS (pull, queue)</div><div class="info-card-body">Patient waits in the room until the doctor is ready. Message is safely stored — no patient is lost even if the doctor is busy.</div></div>
+    <div class="info-card"><div class="info-card-title">Fan-out pattern (SNS → SQS)</div><div class="info-card-body">Code Blue SNS topic fans out to: Crash Team SQS + ICU SQS + Chaplain SQS. Each team pulls at their own pace. Best of both.</div></div>
+    <div class="info-card"><div class="info-card-title">Message filtering</div><div class="info-card-body">Pharmacy subscribes to critical-alerts but only receives messages where type=medication. Cardiac noise stays out.</div></div>
+  </div></div>`;
+  return s;
+}
+function snsPublish(topic,msg){
+  const t=snsTopics.find(x=>x.name===topic);
+  buildLog=[{msg:`[SNS] Broadcasting on topic: ${topic}`,cls:'info'},...(t?t.subs.map(s=>({msg:`[SNS] → Delivered to: ${s}`,cls:'ok'})):[]),{msg:`[SNS] Message: "${msg}"`,cls:'ok'}];
+  rerender();
+}
+function snsFanout(){
+  buildLog=[
+    {msg:'[SNS] critical-alerts broadcast triggered.',cls:'info'},
+    {msg:'[SNS] → SQS: crash-team-queue (they pull when at bedside)',cls:'ok'},
+    {msg:'[SNS] → SQS: icu-prep-queue (ICU readies at their pace)',cls:'ok'},
+    {msg:'[SNS] → SQS: billing-alert-queue (finance records independently)',cls:'ok'},
+    {msg:'[SNS] Fan-out complete: 3 independent, decoupled consumers.',cls:'ok'}
+  ];
+  rerender();
+}
+
+function rS3(){
+  let s=panelHead('Networking · #25','S3 — The Hospital Medical Records Vault & Imaging Archive',
+    'Object storage. Versioning, lifecycle policies, event notifications, cross-region replication.',
+    'S3 → EventBridge/SNS/SQS event notifications: triggers CodePipeline on artifact upload');
+  s+=metaphor('The Medical Records Vault','S3',
+    'S3 is the hospital\'s permanent archive vault: surgical recordings, patient X-rays and CT scans, audit logs (HIPAA requires 7 years), and every version of every treatment protocol ever written. Nothing is ever truly deleted — with versioning enabled, even a "deleted" file leaves a marker and can be fully recovered. Lifecycle rules automatically move old X-rays from the fast-access filing cabinet (S3 Standard) to the deep archive basement (Glacier) after 90 days, saving a fortune.');
+  s+=`<div class="sim-area"><div class="sim-title">Hospital archive vault — active buckets</div>
+  ${s3Buckets.map(b=>`<div class="row-item"><div style="flex:1"><div style="font-weight:600">${b.name}</div><div style="font-size:11.5px;color:var(--color-text-tertiary);margin-top:1px">${b.objects.toLocaleString()} records · ${b.size}</div></div></div>`).join('')}
+  <div class="btn-row" style="margin-top:10px">
+    <button class="btn btn-primary" onclick="s3Upload()">Archive surgical recording (upload artifact)</button>
+    <button class="btn btn-teal" onclick="s3Version()">Enable versioning (protect all records)</button>
+    <button class="btn btn-amber" onclick="s3Lifecycle()">Set HIPAA retention policy (lifecycle)</button>
+    <button class="btn btn-danger" onclick="s3Delete()">Delete record (versioning saves it)</button>
+  </div><div class="log" style="margin-top:10px">${logHtml()}</div></div>
+  <div class="sim-area"><div class="sim-title">Why S3 is the backbone of AWS DevOps</div>
+  <div class="info-grid">
+    <div class="info-card"><div class="info-card-title">Pipeline artifact store</div><div class="info-card-body">Every CodeBuild output and CodePipeline artifact lives here. The OR hands its results to the vault between stages.</div></div>
+    <div class="info-card"><div class="info-card-title">CloudFormation templates</div><div class="info-card-body">Large hospital blueprints must be stored in S3 before CloudFormation can use them.</div></div>
+    <div class="info-card"><div class="info-card-title">Versioning</div><div class="info-card-body">Every overwrite keeps the previous file. Roll back any protocol to any previous version instantly.</div></div>
+    <div class="info-card"><div class="info-card-title">Event notifications</div><div class="info-card-body">New X-ray uploaded → S3 event → SQS → radiologist Lambda notified automatically.</div></div>
+  </div></div>`;
+  return s;
+}
+function s3Upload(){
+  s3Buckets[0].objects++;
+  buildLog=[
+    {msg:'[S3] Archiving cardiac-surgery-recording-v1.3.zip...',cls:'info'},
+    {msg:'[S3] Stored: s3://hospital-deployments/surgeries/v1.3.zip',cls:'ok'},
+    {msg:'[S3] Event notification → SQS → CodePipeline next stage triggered!',cls:'ok'}
+  ];
+  rerender();
+}
+function s3Version(){buildLog=[{msg:'[S3] Versioning ENABLED on hospital-deployments.',cls:'ok'},{msg:'[S3] Every upload creates an immutable version ID.',cls:'ok'},{msg:'[S3] HIPAA: records cannot be permanently deleted while versioning active.',cls:'ok'}];rerender();}
+function s3Lifecycle(){buildLog=[{msg:'[S3] HIPAA retention lifecycle rule applied to patient-imaging-archive:',cls:'info'},{msg:'[S3] Day 0–30: S3 Standard (instant access, active patients)',cls:'ok'},{msg:'[S3] Day 31–365: S3 Infrequent Access (discharged patients)',cls:'ok'},{msg:'[S3] Day 366–2555: Glacier Instant Retrieval (7-year HIPAA retention)',cls:'ok'}];rerender();}
+function s3Delete(){buildLog=[{msg:'[S3] Delete request: patient-record-2021-08821.zip',cls:'warn'},{msg:'[S3] Versioning ON — delete marker created. Record not physically removed.',cls:'ok'},{msg:'[S3] Record fully recoverable using version ID. HIPAA compliant.',cls:'ok'}];rerender();}
+
+show('pipeline');
+</script>
+</body>
+</html>
