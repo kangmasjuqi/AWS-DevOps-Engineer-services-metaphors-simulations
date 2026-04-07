@@ -1,0 +1,971 @@
+<html>
+<header>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AWS DevOps Engineer - services, metaphors & simulations</title>
+</header>
+<body>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:var(--font-sans,sans-serif);font-size:16px;color:var(--color-text-primary);}
+.app{display:grid;grid-template-columns:240px 1fr;min-height:640px;}
+.sidebar{border-right:1px solid var(--color-border-tertiary);padding:10px 0;background:var(--color-background-secondary);overflow-y:auto;max-height:93vh;}
+.sidebar-title{font-size:11px;font-weight:500;color:var(--color-text-tertiary);padding:7px 14px 3px;text-transform:uppercase;letter-spacing:.07em;}
+.svc-btn{width:100%;text-align:left;background:none;border:none;padding:6px 14px;cursor:pointer;display:flex;align-items:center;gap:7px;color:var(--color-text-primary);transition:background .1s;}
+.svc-btn:hover{background:var(--color-background-tertiary);}
+.svc-btn.active{background:var(--color-background-info);color:var(--color-text-info);font-weight:500;}
+.svc-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.svc-name{font-size:13px;flex:1;}
+.svc-num{font-size:11px;color:var(--color-text-tertiary);}
+.svc-btn.active .svc-num{color:var(--color-text-info);}
+.badge{font-size:10px;font-weight:500;padding:1px 5px;border-radius:99px;flex-shrink:0;}
+.badge-new{background:#639922;color:#EAF3DE;}
+.badge-fixed{background:#185FA5;color:#E6F1FB;}
+.badge-warn{background:#854F0B;color:#FAEEDA;}
+.main{padding:20px 24px;overflow-y:auto;max-height:93vh;}
+.panel-title{font-size:18px;font-weight:500;margin-bottom:2px;}
+.panel-sub{font-size:13px;color:var(--color-text-secondary);margin-bottom:4px;}
+.doc-pill{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:500;padding:2px 9px;border-radius:99px;border:1px solid var(--color-border-secondary);color:var(--color-text-secondary);margin-bottom:12px;}
+.correction-box{background:var(--color-background-warning);border:1px solid var(--color-border-warning);border-left:3px solid #EF9F27;border-radius:8px;padding:10px 13px;margin-bottom:10px;font-size:13px;color:var(--color-text-warning);line-height:1.6;}
+.correction-label{font-size:11px;font-weight:500;text-transform:uppercase;letter-spacing:.05em;margin-bottom:3px;color:#854F0B;}
+.metaphor-box{background:var(--color-background-secondary);border:1px solid var(--color-border-tertiary);border-left:3px solid #378ADD;border-radius:8px;padding:11px 14px;margin-bottom:13px;font-size:15px;color:var(--color-text-secondary);line-height:1.6;}
+.metaphor-label{font-size:11px;font-weight:500;text-transform:uppercase;letter-spacing:.06em;color:#378ADD;margin-bottom:3px;}
+.sim-area{border:1px solid var(--color-border-tertiary);border-radius:12px;padding:14px 16px;background:var(--color-background-secondary);margin-bottom:12px;}
+.sim-title{font-size:13px;font-weight:500;margin-bottom:8px;color:var(--color-text-secondary);}
+.btn{display:inline-flex;align-items:center;gap:5px;padding:7px 13px;border-radius:8px;border:none;cursor:pointer;font-size:13px;font-weight:500;transition:opacity .12s;}
+.btn:hover{opacity:.85;}
+.btn:disabled{opacity:.4;cursor:not-allowed;}
+.btn-primary{background:#185FA5;color:#E6F1FB;}
+.btn-success{background:#3B6D11;color:#EAF3DE;}
+.btn-danger{background:#A32D2D;color:#FCEBEB;}
+.btn-amber{background:#854F0B;color:#FAEEDA;}
+.btn-purple{background:#534AB7;color:#EEEDFE;}
+.btn-teal{background:#0F6E56;color:#E1F5EE;}
+.btn-gray{background:var(--color-background-tertiary);color:var(--color-text-secondary);border:1px solid var(--color-border-secondary);}
+.btn-row{display:flex;gap:7px;flex-wrap:wrap;margin-top:8px;}
+.pipeline{display:flex;gap:5px;align-items:center;flex-wrap:wrap;margin-bottom:10px;}
+.stage{display:flex;flex-direction:column;align-items:center;gap:3px;min-width:70px;}
+.stage-box{width:70px;height:42px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:500;text-align:center;border:1.5px solid transparent;transition:all .3s;padding:2px;}
+.stage-idle{background:var(--color-background-tertiary);border-color:var(--color-border-secondary);color:var(--color-text-tertiary);}
+.stage-running{background:#FAEEDA;border-color:#854F0B;color:#633806;}
+.stage-done{background:#EAF3DE;border-color:#3B6D11;color:#27500A;}
+.stage-fail{background:#FCEBEB;border-color:#A32D2D;color:#791F1F;}
+.stage-approval{background:#EEEDFE;border-color:#534AB7;color:#3C3489;}
+.stage-lbl{font-size:10px;color:var(--color-text-tertiary);text-align:center;}
+.pipe-arrow{color:var(--color-text-tertiary);font-size:16px;}
+.log{background:var(--color-background-primary);border:1px solid var(--color-border-tertiary);border-radius:6px;padding:8px 10px;font-family:var(--font-mono,monospace);font-size:12px;color:var(--color-text-secondary);max-height:130px;overflow-y:auto;line-height:1.7;}
+.log .ok{color:#3B6D11;}.log .err{color:#A32D2D;}.log .info{color:#185FA5;}.log .warn{color:#854F0B;}.log .purple{color:#534AB7;}
+.metric-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;}
+.metric{flex:1;min-width:76px;background:var(--color-background-primary);border:1px solid var(--color-border-tertiary);border-radius:8px;padding:9px 11px;}
+.metric-val{font-size:22px;font-weight:500;}
+.metric-lbl{font-size:12px;color:var(--color-text-secondary);}
+.alarm{display:flex;align-items:center;gap:8px;padding:7px 12px;border-radius:8px;font-size:13px;margin-bottom:8px;}
+.alarm-ok{background:#EAF3DE;color:#27500A;border:1px solid #97C459;}
+.alarm-warn{background:#FAEEDA;color:#633806;border:1px solid #EF9F27;}
+.alarm-crit{background:#FCEBEB;color:#791F1F;border:1px solid #F09595;}
+.alarm-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.order-item{display:flex;align-items:center;gap:8px;padding:7px 11px;border:1px solid var(--color-border-tertiary);border-radius:8px;background:var(--color-background-primary);font-size:13px;margin-bottom:5px;}
+.pill{font-size:11px;font-weight:500;padding:2px 7px;border-radius:99px;white-space:nowrap;}
+.pill-blue{background:#EEF3FE;color:#185FA5;}
+.pill-green{background:#EAF3DE;color:#27500A;}
+.pill-red{background:#FCEBEB;color:#791F1F;}
+.pill-amber{background:#FAEEDA;color:#633806;}
+.pill-purple{background:#EEEDFE;color:#3C3489;}
+.pill-gray{background:var(--color-background-tertiary);color:var(--color-text-secondary);}
+.tag{font-size:11px;font-weight:500;padding:2px 7px;border-radius:99px;background:var(--color-background-tertiary);color:var(--color-text-secondary);border:1px solid var(--color-border-secondary);}
+.tag-row{display:flex;gap:5px;flex-wrap:wrap;}
+.progress-bar{height:8px;border-radius:4px;background:var(--color-border-tertiary);overflow:hidden;flex:1;}
+.progress-fill{height:100%;border-radius:4px;transition:width .4s;}
+.scroll-x{display:flex;gap:7px;overflow-x:auto;padding-bottom:4px;}
+.info-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;}
+.info-card{background:var(--color-background-primary);border:1px solid var(--color-border-tertiary);border-radius:8px;padding:10px 12px;font-size:13px;}
+.info-card-title{font-weight:500;margin-bottom:3px;}
+.info-card-body{color:var(--color-text-secondary);line-height:1.6;}
+@media(prefers-color-scheme:dark){
+  .stage-running{background:#412402;border-color:#EF9F27;color:#FAC775;}
+  .stage-done{background:#173404;border-color:#639922;color:#C0DD97;}
+  .stage-fail{background:#501313;border-color:#E24B4A;color:#F7C1C1;}
+  .stage-approval{background:#26215C;border-color:#AFA9EC;color:#CECBF6;}
+  .correction-box{background:rgba(239,159,39,.08);border-color:#854F0B;}
+  .correction-label{color:#EF9F27;}
+  .metaphor-box{border-left-color:#85B7EB;}.metaphor-label{color:#85B7EB;}
+  .btn-primary{background:#0C447C;color:#B5D4F4;}
+  .btn-success{background:#27500A;color:#C0DD97;}
+  .btn-danger{background:#791F1F;color:#F7C1C1;}
+  .btn-amber{background:#633806;color:#FAC775;}
+  .btn-purple{background:#3C3489;color:#CECBF6;}
+  .btn-teal{background:#085041;color:#9FE1CB;}
+  .pill-blue{background:#042C53;color:#85B7EB;}
+  .pill-green{background:#173404;color:#C0DD97;}
+  .pill-red{background:#501313;color:#F7C1C1;}
+  .pill-amber{background:#412402;color:#FAC775;}
+  .pill-purple{background:#26215C;color:#CECBF6;}
+  .badge-new{background:#27500A;color:#C0DD97;}
+  .badge-fixed{background:#0C447C;color:#B5D4F4;}
+  .badge-warn{background:#633806;color:#FAC775;}
+}
+:root {
+    --color-background-primary: light-dark(rgba(255, 255, 255, 1), rgba(48, 48, 46, 1));
+    --color-background-secondary: light-dark(rgba(245, 244, 237, 1), rgba(38, 38, 36, 1));
+    --color-background-tertiary: light-dark(rgba(250, 249, 245, 1), rgba(20, 20, 19, 1));
+    --color-background-inverse: light-dark(rgba(20, 20, 19, 1), rgba(250, 249, 245, 1));
+    --color-background-ghost: light-dark(rgba(255, 255, 255, 0), rgba(48, 48, 46, 0));
+    --color-background-info: light-dark(rgba(214, 228, 246, 1), rgba(37, 62, 95, 1));
+    --color-background-danger: light-dark(rgba(247, 236, 236, 1), rgba(96, 42, 40, 1));
+    --color-background-success: light-dark(rgba(233, 241, 220, 1), rgba(27, 70, 20, 1));
+    --color-background-warning: light-dark(rgba(246, 238, 223, 1), rgba(72, 58, 15, 1));
+    --color-background-disabled: light-dark(rgba(255, 255, 255, 0.5), rgba(48, 48, 46, 0.5));
+    --color-text-primary: light-dark(rgba(20, 20, 19, 1), rgba(250, 249, 245, 1));
+    --color-text-secondary: light-dark(rgba(61, 61, 58, 1), rgba(194, 192, 182, 1));
+    --color-text-tertiary: light-dark(rgba(115, 114, 108, 1), rgba(156, 154, 146, 1));
+    --color-text-inverse: light-dark(rgba(255, 255, 255, 1), rgba(20, 20, 19, 1));
+    --color-text-info: light-dark(rgba(50, 102, 173, 1), rgba(128, 170, 221, 1));
+    --color-text-danger: light-dark(rgba(127, 44, 40, 1), rgba(238, 136, 132, 1));
+    --color-text-success: light-dark(rgba(38, 91, 25, 1), rgba(122, 185, 72, 1));
+    --color-text-warning: light-dark(rgba(90, 72, 21, 1), rgba(209, 160, 65, 1));
+    --color-text-disabled: light-dark(rgba(20, 20, 19, 0.5), rgba(250, 249, 245, 0.5));
+    --color-text-ghost: light-dark(rgba(115, 114, 108, 0.5), rgba(156, 154, 146, 0.5));
+    --color-border-primary: light-dark(rgba(31, 30, 29, 0.4), rgba(222, 220, 209, 0.4));
+    --color-border-secondary: light-dark(rgba(31, 30, 29, 0.3), rgba(222, 220, 209, 0.3));
+    --color-border-tertiary: light-dark(rgba(31, 30, 29, 0.15), rgba(222, 220, 209, 0.15));
+    --color-border-inverse: light-dark(rgba(255, 255, 255, 0.3), rgba(20, 20, 19, 0.15));
+    --color-border-ghost: light-dark(rgba(31, 30, 29, 0), rgba(222, 220, 209, 0));
+    --color-border-info: light-dark(rgba(70, 130, 213, 1), rgba(70, 130, 213, 1));
+    --color-border-danger: light-dark(rgba(167, 61, 57, 1), rgba(205, 92, 88, 1));
+    --color-border-success: light-dark(rgba(67, 116, 38, 1), rgba(89, 145, 48, 1));
+    --color-border-warning: light-dark(rgba(128, 92, 31, 1), rgba(168, 120, 41, 1));
+    --color-border-disabled: light-dark(rgba(31, 30, 29, 0.1), rgba(222, 220, 209, 0.1));
+    --color-ring-primary: light-dark(rgba(20, 20, 19, 0.7), rgba(250, 249, 245, 0.7));
+    --color-ring-secondary: light-dark(rgba(61, 61, 58, 0.7), rgba(194, 192, 182, 0.7));
+    --color-ring-inverse: light-dark(rgba(255, 255, 255, 0.7), rgba(20, 20, 19, 0.7));
+    --color-ring-info: light-dark(rgba(50, 102, 173, 0.5), rgba(128, 170, 221, 0.5));
+    --color-ring-danger: light-dark(rgba(167, 61, 57, 0.5), rgba(205, 92, 88, 0.5));
+    --color-ring-success: light-dark(rgba(67, 116, 38, 0.5), rgba(89, 145, 48, 0.5));
+    --color-ring-warning: light-dark(rgba(128, 92, 31, 0.5), rgba(168, 120, 41, 0.5));
+}
+.app {
+  max-width: 1200px;
+  margin: 0px auto;
+}
+
+.header {
+  max-width: 1200px;
+  margin: 0px auto;
+  padding: 20px 24px 18px;
+  border-bottom: 0.5px solid var(--color-border-tertiary);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.header-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--border-radius-md, 8px);
+  background: #E6F1FB;
+  border: 0.5px solid #B5D4F4;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.header-icon svg { width: 18px; height: 18px; }
+.header-text h1 {
+  font-size: 20px;
+  font-weight: 500;
+  color: var(--color-text-primary);
+  line-height: 1.3;
+}
+.header-text p {
+  font-size: 12px;
+  color: var(--color-text-tertiary);
+  margin-top: 2px;
+}
+.header-text p span {
+  font-weight: 700;
+  border-radius: 99px;
+  text-transform: uppercase;
+}
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.hpill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  font-weight: 500;
+  padding: 4px 10px;
+  border-radius: 99px;
+  border: 0.5px solid var(--color-border-secondary);
+  color: var(--color-text-secondary);
+  background: var(--color-background-secondary);
+  text-decoration: none;
+}
+.hpill-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+.hdivider { height: 14px; width: 0.5px; background: var(--color-border-secondary); }
+@media(prefers-color-scheme:dark){
+  .header-icon { background: #042C53; border-color: #0C447C; }
+}
+</style>
+
+<div class="header">
+  <div class="header-left">
+    <div class="header-icon">
+      <svg viewBox="0 0 18 18" fill="none">
+        <path d="M3 9h12M9 3v12M5 5l8 8M13 5l-8 8"
+              stroke="#185FA5" stroke-width="1.4" stroke-linecap="round"/>
+      </svg>
+    </div>
+    <div class="header-text">
+      <h1>AWS DevOps Engineer — 20+ services, metaphors &amp; simulations</h1>
+      <p><span>Pizza restaurant</span> as a real-world analogy · verified against docs.aws.amazon.com · Apr 2026</p>
+    </div>
+  </div>
+  <div class="header-right">
+    <span class="hpill"><span class="hpill-dot" style="background:#185FA5"></span>DOP-C02</span>
+    <div class="hdivider"></div>
+    <span class="hpill"><span class="hpill-dot" style="background:#3B6D11"></span>20+ services</span>
+    <div class="hdivider"></div>
+    <a class="hpill" href="https://docs.aws.amazon.com/" target="_blank">
+      <svg width="11" height="11" viewBox="0 0 12 12" fill="none">
+        <path d="M2 10L10 2M10 2H5M10 2v5"
+              stroke="currentColor" stroke-width="1.4"
+              stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      AWS docs
+    </a>
+  </div>
+</div>
+
+<div class="app">
+<div class="sidebar">
+
+  <div class="sidebar-title">CI/CD (22% of exam)</div>
+  <button class="svc-btn active" onclick="show('pipeline')"><span class="svc-dot" style="background:#185FA5"></span><span class="svc-name">CodePipeline</span><span class="svc-num">#1</span></button>
+  <button class="svc-btn" onclick="show('build')"><span class="svc-dot" style="background:#185FA5"></span><span class="svc-name">CodeBuild</span><span class="svc-num">#2</span></button>
+  <button class="svc-btn" onclick="show('deploy')"><span class="svc-dot" style="background:#185FA5"></span><span class="svc-name">CodeDeploy</span><span class="svc-num">#3</span></button>
+  <button class="svc-btn" onclick="show('commit')"><span class="svc-dot" style="background:#185FA5"></span><span class="svc-name">CodeCommit</span><span class="badge badge-fixed">BACK</span><span class="svc-num">#4</span></button>
+  <button class="svc-btn" onclick="show('artifact')"><span class="svc-dot" style="background:#185FA5"></span><span class="svc-name">CodeArtifact</span><span class="svc-num">#5</span></button>
+  <button class="svc-btn" onclick="show('beanstalk')"><span class="svc-dot" style="background:#185FA5"></span><span class="svc-name">Elastic Beanstalk</span><span class="svc-num">#6</span></button>
+
+  <div class="sidebar-title">IaC (17% of exam)</div>
+  <button class="svc-btn" onclick="show('cfn')"><span class="svc-dot" style="background:#0F6E56"></span><span class="svc-name">CloudFormation</span><span class="svc-num">#7</span></button>
+  <button class="svc-btn" onclick="show('cdk')"><span class="svc-dot" style="background:#0F6E56"></span><span class="svc-name">CDK</span><span class="svc-num">#8</span></button>
+  <button class="svc-btn" onclick="show('ssm')"><span class="svc-dot" style="background:#0F6E56"></span><span class="svc-name">Systems Manager</span><span class="svc-num">#9</span></button>
+  <button class="svc-btn" onclick="show('ssm_app')"><span class="svc-dot" style="background:#0F6E56"></span><span class="svc-name">SSM App Manager</span><span class="badge badge-fixed">FIXED</span><span class="svc-num">#10</span></button>
+
+  <div class="sidebar-title">Compute & Containers</div>
+  <button class="svc-btn" onclick="show('ecs')"><span class="svc-dot" style="background:#854F0B"></span><span class="svc-name">ECS</span><span class="svc-num">#11</span></button>
+  <button class="svc-btn" onclick="show('eks')"><span class="svc-dot" style="background:#854F0B"></span><span class="svc-name">EKS</span><span class="svc-num">#12</span></button>
+  <button class="svc-btn" onclick="show('lambda')"><span class="svc-dot" style="background:#854F0B"></span><span class="svc-name">Lambda</span><span class="svc-num">#13</span></button>
+  <button class="svc-btn" onclick="show('asg')"><span class="svc-dot" style="background:#854F0B"></span><span class="svc-name">Auto Scaling</span><span class="svc-num">#14</span></button>
+
+  <div class="sidebar-title">Monitoring (15% of exam)</div>
+  <button class="svc-btn" onclick="show('cw')"><span class="svc-dot" style="background:#993556"></span><span class="svc-name">CloudWatch</span><span class="svc-num">#15</span></button>
+  <button class="svc-btn" onclick="show('xray')"><span class="svc-dot" style="background:#993556"></span><span class="svc-name">X-Ray</span><span class="svc-num">#16</span></button>
+  <button class="svc-btn" onclick="show('eb')"><span class="svc-dot" style="background:#993556"></span><span class="svc-name">EventBridge</span><span class="svc-num">#17</span></button>
+
+  <div class="sidebar-title">Governance (17% security)</div>
+  <button class="svc-btn" onclick="show('config')"><span class="svc-dot" style="background:#534AB7"></span><span class="svc-name">AWS Config</span><span class="svc-num">#18</span></button>
+  <button class="svc-btn" onclick="show('trail')"><span class="svc-dot" style="background:#534AB7"></span><span class="svc-name">CloudTrail</span><span class="svc-num">#19</span></button>
+  <button class="svc-btn" onclick="show('iam')"><span class="svc-dot" style="background:#534AB7"></span><span class="svc-name">IAM</span><span class="svc-num">#20</span></button>
+
+  <div class="sidebar-title">Networking & Reliability</div>
+  <button class="svc-btn" onclick="show('r53')"><span class="svc-dot" style="background:#D85A30"></span><span class="svc-name">Route 53</span><span class="svc-num">#21</span></button>
+  <button class="svc-btn" onclick="show('elb')"><span class="svc-dot" style="background:#D85A30"></span><span class="svc-name">Elastic Load Balancer</span><span class="svc-num">#22</span></button>
+  <button class="svc-btn" onclick="show('sqs')"><span class="svc-dot" style="background:#D85A30"></span><span class="svc-name">SQS</span><span class="svc-num">#23</span></button>
+  <button class="svc-btn" onclick="show('sns')"><span class="svc-dot" style="background:#D85A30"></span><span class="svc-name">SNS</span><span class="svc-num">#24</span></button>
+  <button class="svc-btn" onclick="show('s3')"><span class="svc-dot" style="background:#D85A30"></span><span class="svc-name">S3</span><span class="svc-num">#25</span></button>
+
+</div>
+<div class="main" id="main-area"></div>
+</div>
+
+<script>
+/* ── shared state ── */
+let buildLog=[], pipelineState=['idle','idle','idle','idle','idle'], approvalPending=false;
+let cwMetrics={orders:0,errors:0,latency:320}, alarmState='ok';
+let events=[], trailLog=[], traces=[];
+let commits=[{hash:'a3f9c',msg:'Add pepperoni recipe',author:'Chef Mario',time:'2 min ago'},{hash:'b71d2',msg:'Fix oven temp bug',author:'Chef Aiko',time:'15 min ago'},{hash:'d9e41',msg:'Update delivery routes',author:'DevOps Sam',time:'1 hr ago'}];
+let packages=[{name:'pizza-dough',ver:'2.3.1',dl:1420},{name:'tomato-sauce',ver:'1.8.0',dl:830},{name:'cheese-blend',ver:'3.0.2',dl:2100}];
+let containers=[{id:'web-1',status:'running',cpu:34},{id:'web-2',status:'running',cpu:28},{id:'worker-1',status:'running',cpu:55}];
+let instances=2;
+let ssmParams=[{key:'/pizza/db-password',val:'••••••••',type:'SecureString'},{key:'/pizza/api-key',val:'••••••••',type:'SecureString'},{key:'/pizza/max-order-size',val:'10',type:'String'}];
+let appMgrApps=[{name:'pizza-ordering',stacks:3,healthy:3},{name:'pizza-delivery',stacks:2,healthy:1},{name:'pizza-payments',stacks:1,healthy:1}];
+let configRules=[{name:'Fridge temp OK',status:'ok'},{name:'Chefs wear gloves',status:'ok'},{name:'All exits clear',status:'ok'}];
+let iamRoles=[{name:'Chef',perms:['kitchen','oven']},{name:'Barista',perms:['coffee']},{name:'Manager',perms:['kitchen','oven','safe','coffee','admin']}];
+let sqsQueue=[], sqsMsgCount=0;
+let snsTopics=[{name:'order-alerts',subs:['oven-team@pizza.com','driver-app','billing-lambda']},{name:'low-stock-alerts',subs:['manager@pizza.com','sns-sms-driver']}];
+let s3Buckets=[{name:'pizza-artifacts',objects:14,size:'2.3 GB'},{name:'pizza-logs',objects:88241,size:'12.1 GB'},{name:'pizza-backups',objects:7,size:'890 MB'}];
+let r53Records=[{name:'pizza.com',type:'A',target:'203.0.113.10',health:'healthy'},{name:'api.pizza.com',type:'CNAME',target:'alb-1234.amazonaws.com',health:'healthy'},{name:'backup.pizza.com',type:'A',target:'203.0.113.20',health:'healthy'}];
+let elbTargets=[{id:'i-0a1b',zone:'us-east-1a',health:'healthy',req:142},{id:'i-0c2d',zone:'us-east-1b',health:'healthy',req:138},{id:'i-0e3f',zone:'us-east-1c',health:'healthy',req:156}];
+let lamInv=0, lamCost=0, orderCount=0;
+
+function addEvent(msg,type){events.unshift({msg,type,time:new Date().toLocaleTimeString()});if(events.length>8)events.pop();}
+function addTrail(svc,action,detail){trailLog.unshift({svc,action,user:'DevOps-Role',time:new Date().toLocaleTimeString(),detail:JSON.stringify(detail)});if(trailLog.length>7)trailLog.pop();}
+function checkAlarm(){alarmState=cwMetrics.errors>=3?'crit':cwMetrics.errors>=1?'warn':'ok';}
+function addOrder(pizza){orderCount++;cwMetrics.orders++;sqsQueue.unshift({msg:'ProcessOrder #'+orderCount,vis:30});sqsMsgCount++;addEvent('New order: '+pizza+' #'+orderCount,'order');addTrail('OrderService','PlaceOrder',{pizza,orderId:orderCount});rerender();}
+function logHtml(){return buildLog.map(l=>`<div class="${l.cls}">${l.msg}</div>`).join('')||'<span style="color:var(--color-text-tertiary)">No events yet.</span>';}
+
+let currentPanel='pipeline';
+const panelKeys=['pipeline','build','deploy','commit','artifact','beanstalk','cfn','cdk','ssm','ssm_app','ecs','eks','lambda','asg','cw','xray','eb','config','trail','iam','r53','elb','sqs','sns','s3'];
+function show(id){
+  currentPanel=id;
+  document.querySelectorAll('.svc-btn').forEach(b=>b.classList.remove('active'));
+  const idx=panelKeys.indexOf(id);
+  const btns=document.querySelectorAll('.svc-btn');
+  if(btns[idx])btns[idx].classList.add('active');
+  rerender();
+}
+
+function rerender(){
+  const el=document.getElementById('main-area');
+  el.innerHTML=renderPanel(currentPanel);
+}
+
+function corrBox(msg){return`<div class="correction-box"><div class="correction-label">Official AWS docs correction</div>${msg}</div>`;}
+function docPill(label){return`<div class="doc-pill">docs.aws.amazon.com — verified Apr 2026: ${label}</div>`;}
+
+function renderPanel(id){
+  switch(id){
+    case 'pipeline': return rPipeline();
+    case 'build': return rBuild();
+    case 'deploy': return rDeploy();
+    case 'commit': return rCommit();
+    case 'artifact': return rArtifact();
+    case 'beanstalk': return rBeanstalk();
+    case 'cfn': return rCfn();
+    case 'cdk': return rCdk();
+    case 'ssm': return rSsm();
+    case 'ssm_app': return rSsmApp();
+    case 'ecs': return rEcs();
+    case 'eks': return rEks();
+    case 'lambda': return rLambda();
+    case 'asg': return rAsg();
+    case 'cw': return rCw();
+    case 'xray': return rXray();
+    case 'eb': return rEb();
+    case 'config': return rConfig();
+    case 'trail': return rTrail();
+    case 'iam': return rIam();
+    case 'r53': return rR53();
+    case 'elb': return rElb();
+    case 'sqs': return rSqs();
+    case 'sns': return rSns();
+    case 's3': return rS3();
+    default: return '';
+  }
+}
+
+function header(title,sub,docNote){
+  return`<div class="panel-title">${title}</div><div class="panel-sub">${sub}</div>${docPill(docNote)}`;
+}
+function metaphor(text){
+  return`<div class="metaphor-box">${text}</div>`;
+}
+
+/* ─── PIPELINE ─── */
+function rPipeline(){
+  const stages=['Source','Build','Test','Approval','Deploy'];
+  const icons=['Recipe saved','Oven','Taste test','Manager OK?','Delivered!'];
+  let s=header('CodePipeline — The Pizza Assembly Line',
+    'Orchestrates CI/CD: Source → Build → Test → Approval → Deploy',
+    '6 action types: source, build, test, deploy, approval, invoke');
+  s+=corrBox('Previous version was missing the <b>Approval action type</b>. Per AWS docs, valid action types are: source, build, test, deploy, <b>approval</b>, and invoke. The approval gate is exam-critical — it pauses the pipeline and waits for a human (e.g. manager) to click "Approve" before production deploy proceeds.');
+  s+=metaphor('You write a new recipe. CodePipeline is the restaurant manager who kicks off each station automatically — prep → oven → taste test → <b>manager must sign the paper</b> → delivery. Without the manager\'s signature (Approval action), no pizza leaves the kitchen.');
+  const stageStyles=['stage-idle','stage-idle','stage-idle','stage-approval','stage-idle'];
+  s+=`<div class="sim-area"><div class="sim-title">Pipeline with Approval gate — run it and see what happens</div><div class="pipeline">`;
+  stages.forEach((st,i)=>{
+    const base=pipelineState[i]==='idle'?stageStyles[i]:pipelineState[i]==='running'?'stage-running':pipelineState[i]==='done'?'stage-done':pipelineState[i]==='approval'?'stage-approval':'stage-fail';
+    s+=`<div class="stage"><div class="stage-box ${base}">${st}</div><div class="stage-lbl">${icons[i]}</div></div>`;
+    if(i<4)s+=`<div class="pipe-arrow">→</div>`;
+  });
+  s+=`</div><div class="btn-row">
+    <button class="btn btn-primary" onclick="runPipeline(false)">Push recipe update</button>
+    <button class="btn btn-danger" onclick="runPipeline(true)">Push bad recipe (fail test)</button>
+    <button class="btn btn-purple" id="approve-btn" onclick="approveGate()" ${!approvalPending?'disabled':''}>Approve deployment (manager signs)</button>
+    <button class="btn btn-gray" onclick="resetPipeline()">Reset</button>
+  </div></div>
+  <div class="sim-area"><div class="sim-title">Execution log</div><div class="log">${logHtml()}</div></div>
+  <div class="sim-area"><div class="sim-title">Execution modes (exam tip)</div>
+  <div class="info-grid">
+    <div class="info-card"><div class="info-card-title">SUPERSEDED (default)</div><div class="info-card-body">Newer execution overtakes older one waiting between stages.</div></div>
+    <div class="info-card"><div class="info-card-title">QUEUED</div><div class="info-card-body">Executions line up in order — nothing skips the queue.</div></div>
+    <div class="info-card"><div class="info-card-title">PARALLEL</div><div class="info-card-body">Multiple executions run simultaneously. No rollback available.</div></div>
+    <div class="info-card"><div class="info-card-title">Stage conditions (2024)</div><div class="info-card-body">Attach CloudWatch alarm rules to auto-rollback a stage on failure.</div></div>
+  </div></div>`;
+  return s;
+}
+function runPipeline(fail){
+  pipelineState=['idle','idle','idle','idle','idle'];approvalPending=false;buildLog=[];
+  const stages=['Source','Build','Test','Approval','Deploy'];
+  let delay=0;
+  stages.forEach((st,i)=>{
+    if(fail && i>=2){
+      if(i===2){setTimeout(()=>{pipelineState[2]='running';buildLog.push({msg:`[${ts()}] Test — RUNNING...`,cls:'info'});rerender();setTimeout(()=>{pipelineState[2]='fail';buildLog.push({msg:`[${ts()}] Test — FAILED: Recipe too salty!`,cls:'err'});buildLog.push({msg:`[${ts()}] Pipeline stopped. Stages 4-5 will NOT run.`,cls:'err'});rerender();},1100);},delay);}
+      return;
+    }
+    if(i===3){
+      setTimeout(()=>{pipelineState[3]='approval';buildLog.push({msg:`[${ts()}] Approval — WAITING for manager sign-off...`,cls:'purple'});approvalPending=true;rerender();},delay);
+      delay+=1600;return;
+    }
+    setTimeout(()=>{pipelineState[i]='running';buildLog.push({msg:`[${ts()}] ${st} — RUNNING...`,cls:'info'});rerender();
+      setTimeout(()=>{pipelineState[i]='done';buildLog.push({msg:`[${ts()}] ${st} — PASSED`,cls:'ok'});rerender();},1100);
+    },delay);
+    delay+=1600;
+  });
+}
+function approveGate(){
+  if(!approvalPending)return;
+  approvalPending=false;pipelineState[3]='done';
+  buildLog.push({msg:`[${ts()}] Approval — APPROVED by manager`,cls:'ok'});
+  addTrail('CodePipeline','ApproveAction',{stage:'Approval',result:'Approved'});
+  setTimeout(()=>{pipelineState[4]='running';buildLog.push({msg:`[${ts()}] Deploy — RUNNING...`,cls:'info'});rerender();
+    setTimeout(()=>{pipelineState[4]='done';buildLog.push({msg:`[${ts()}] Deploy — SUCCESS. Pizza delivered!`,cls:'ok'});rerender();},1200);
+  },400);rerender();
+}
+function resetPipeline(){pipelineState=['idle','idle','idle','idle','idle'];buildLog=[];approvalPending=false;rerender();}
+function ts(){return new Date().toLocaleTimeString();}
+
+/* ─── BUILD ─── */
+function rBuild(){
+  let s=header('CodeBuild — The Pizza Oven',
+    'Compiles code, runs tests, produces artifacts. Fully managed, pay per build-minute.',
+    'Artifacts stored in S3 artifact bucket between pipeline stages');
+  s+=metaphor('Raw ingredients (source code) go in. The oven (CodeBuild) bakes them at the right temperature (compilation) and boxes the finished pizza (artifact). If an ingredient is bad, the oven rejects the whole batch and gives you the exact error line.');
+  s+=`<div class="sim-area"><div class="sim-title">Try building — watch the buildspec run</div>
+  <div class="btn-row">
+    <button class="btn btn-primary" onclick="runBuild('Margherita')">Build Margherita</button>
+    <button class="btn btn-amber" onclick="runBuild('Pepperoni')">Build Pepperoni</button>
+    <button class="btn btn-danger" onclick="runBuild('Bad')">Bad ingredients (test failure)</button>
+  </div></div>
+  <div class="sim-area"><div class="sim-title">Build log (buildspec.yml output)</div><div class="log">${logHtml()}</div></div>
+  <div class="sim-area"><div class="sim-title">Key exam facts</div>
+  <div class="info-grid">
+    <div class="info-card"><div class="info-card-title">buildspec.yml phases</div><div class="info-card-body">install → pre_build → build → post_build. Each phase can have commands and on-failure actions.</div></div>
+    <div class="info-card"><div class="info-card-title">Artifact store</div><div class="info-card-body">CodeBuild outputs artifacts to S3. CodePipeline picks them up for the next stage.</div></div>
+    <div class="info-card"><div class="info-card-title">VPC support</div><div class="info-card-body">CodeBuild can run inside your VPC to access private resources like RDS or private repos.</div></div>
+    <div class="info-card"><div class="info-card-title">Caching</div><div class="info-card-body">Cache dependencies in S3 or locally to speed up repeated builds dramatically.</div></div>
+  </div></div>`;
+  return s;
+}
+function runBuild(t){
+  buildLog=[];buildLog.push({msg:`[BUILD] install: Pulling packages from CodeArtifact...`,cls:'info'});
+  buildLog.push({msg:`[BUILD] pre_build: Running unit tests...`,cls:'info'});
+  setTimeout(()=>{
+    if(t==='Bad'){buildLog.push({msg:`[ERROR] build: tomato-sauce v0.0.1 not found in CodeArtifact!`,cls:'err'});buildLog.push({msg:`[BUILD] FAILED. Exit code 1. Artifact NOT stored.`,cls:'err'});}
+    else{buildLog.push({msg:`[BUILD] build: Compiling ${t} pizza recipe... OK`,cls:'ok'});buildLog.push({msg:`[BUILD] post_build: Packaging artifact → ${t.toLowerCase()}-v1.3.zip`,cls:'ok'});buildLog.push({msg:`[BUILD] Uploading artifact to S3 pipeline bucket...`,cls:'ok'});buildLog.push({msg:`[BUILD] SUCCESS. Duration: 14.2s. Cost: $0.0023`,cls:'ok'});}
+    rerender();
+  },900);rerender();
+}
+
+/* ─── DEPLOY ─── */
+function rDeploy(){
+  let s=header('CodeDeploy — The Delivery Driver',
+    'Deploys to EC2, ECS, Lambda. Blue/green, rolling, canary, all-at-once.',
+    'Lifecycle hooks: BeforeInstall, AfterInstall, ApplicationStart, ValidateService');
+  s+=metaphor('Your delivery driver (CodeDeploy) can deliver new pizza recipes to customers in different ways. All-at-once is fast but risky. Rolling changes one street at a time. Blue/Green runs two full fleets and switches the GPS redirect. Canary tests 10% of customers first.');
+  s+=`<div class="sim-area"><div class="sim-title">Choose your deployment strategy</div>
+  <div class="scroll-x" style="margin-bottom:10px">
+    ${['all-at-once','rolling','blue/green','canary 10%','rollback'].map(s=>`<button class="btn btn-primary" style="white-space:nowrap" onclick="runDeploy('${s}')">${s}</button>`).join('')}
+  </div><div class="log">${logHtml()}</div></div>
+  <div class="sim-area"><div class="sim-title">Lifecycle hooks (exam-critical)</div>
+  <div style="font-size:13px;color:var(--color-text-secondary);line-height:1.9">
+    Hooks let you run scripts at each deployment step:<br>
+    <b>BeforeInstall</b> → back up current version<br>
+    <b>AfterInstall</b> → set file permissions<br>
+    <b>ApplicationStart</b> → start the app server<br>
+    <b>ValidateService</b> → run health checks, trigger rollback if they fail
+  </div></div>`;
+  return s;
+}
+function runDeploy(s){
+  buildLog=[];buildLog.push({msg:`[DEPLOY] Strategy: ${s}`,cls:'info'});
+  setTimeout(()=>{
+    if(s==='canary 10%'){buildLog.push({msg:`[DEPLOY] BeforeInstall hook: backing up current version`,cls:'ok'});buildLog.push({msg:`[DEPLOY] Routing 10% traffic to new recipe...`,cls:'info'});buildLog.push({msg:`[DEPLOY] ValidateService: error rate 0.2% — OK`,cls:'ok'});buildLog.push({msg:`[DEPLOY] Shifting 100% traffic. Complete.`,cls:'ok'});}
+    else if(s==='blue/green'){buildLog.push({msg:`[DEPLOY] Spinning up Green environment...`,cls:'info'});buildLog.push({msg:`[DEPLOY] ApplicationStart hook: service healthy`,cls:'ok'});buildLog.push({msg:`[DEPLOY] Switching load balancer Blue → Green`,cls:'ok'});buildLog.push({msg:`[DEPLOY] Blue kept for 1hr rollback window.`,cls:'ok'});}
+    else if(s==='rolling'){['1/3','2/3','3/3'].forEach(z=>buildLog.push({msg:`[DEPLOY] Zone ${z}: BeforeInstall → Install → ValidateService — OK`,cls:'ok'}));}
+    else if(s==='rollback'){buildLog.push({msg:`[DEPLOY] Rollback triggered by CloudWatch alarm`,cls:'warn'});buildLog.push({msg:`[DEPLOY] Redeploying last successful revision...`,cls:'info'});buildLog.push({msg:`[DEPLOY] Rollback complete. Service restored.`,cls:'ok'});}
+    else{buildLog.push({msg:`[DEPLOY] Replacing ALL instances at once...`,cls:'warn'});buildLog.push({msg:`[DEPLOY] ~8s downtime. Not recommended for production.`,cls:'warn'});buildLog.push({msg:`[DEPLOY] Complete.`,cls:'ok'});}
+    rerender();
+  },800);rerender();
+}
+
+/* ─── COMMIT ─── */
+function rCommit(){
+  let s=header('CodeCommit — The Recipe Book (Git)',
+    'Managed private Git. IAM-native, VPC endpoint support, CloudTrail logging.',
+    'Returned to full GA — Nov 2025. New customers can create repos again.');
+  s+=corrBox('AWS temporarily de-emphasized CodeCommit in July 2024 (stopped new customers). After strong customer feedback about its IAM integration and VPC endpoint support — especially from regulated industries — AWS <b>reversed the decision in November 2025</b>. CodeCommit is back to full General Availability with a published feature roadmap including Git LFS support.');
+  s+=metaphor('Every pizza recipe your team writes lives in a locked recipe book (CodeCommit). Chefs work on their own copy and merge changes. The book keeps every version ever written — including the one before last week\'s disaster. And unlike using GitHub, this book never leaves the AWS building (VPC boundary).');
+  s+=`<div class="sim-area"><div class="sim-title">Repository — current commits</div>
+  <div>${commits.map(c=>`<div class="order-item"><code style="font-size:12px;color:var(--color-text-tertiary)">${c.hash}</code><div style="flex:1"><div>${c.msg}</div><div style="font-size:12px;color:var(--color-text-tertiary)">${c.author} · ${c.time}</div></div></div>`).join('')}</div>
+  <div class="btn-row">
+    <button class="btn btn-primary" onclick="addCommit()">Commit new recipe</button>
+    <button class="btn btn-gray" onclick="addBranch()">Create feature branch</button>
+  </div></div>
+  <div class="sim-area"><div class="sim-title">Why CodeCommit over GitHub for regulated industries</div>
+  <div class="info-grid">
+    <div class="info-card"><div class="info-card-title">IAM integration</div><div class="info-card-body">Access controlled by IAM roles/policies — no separate SSH keys or tokens to manage.</div></div>
+    <div class="info-card"><div class="info-card-title">VPC endpoint</div><div class="info-card-body">Git traffic never leaves the AWS network — required for high-security workloads.</div></div>
+    <div class="info-card"><div class="info-card-title">CloudTrail logging</div><div class="info-card-body">Every git push, clone, and pull is logged in CloudTrail automatically.</div></div>
+    <div class="info-card"><div class="info-card-title">Triggers → CodePipeline</div><div class="info-card-body">A git push to main instantly triggers your CodePipeline via EventBridge.</div></div>
+  </div></div>`;
+  return s;
+}
+function addCommit(){const msgs=['Add BBQ sauce recipe','Fix cheese overflow bug','Optimize bake time','Add vegan option'];const authors=['Chef Mario','Chef Aiko','DevOps Sam'];commits.unshift({hash:Math.random().toString(36).substr(2,5),msg:msgs[Math.floor(Math.random()*msgs.length)],author:authors[Math.floor(Math.random()*authors.length)],time:'just now'});addTrail('CodeCommit','PutFile',{branch:'main'});rerender();}
+function addBranch(){commits.unshift({hash:'branch',msg:'→ feature/spicy-pizza branched from main',author:'You',time:'just now'});rerender();}
+
+/* ─── ARTIFACT ─── */
+function rArtifact(){
+  let s=header('CodeArtifact — The Ingredient Supplier',
+    'Managed package repo: npm, Maven, PyPI, NuGet, Swift. Upstream caching.',
+    'Upstream repos: cache from public registries, serve internally approved versions');
+  s+=metaphor('You don\'t grow your own tomatoes. You order from a trusted supplier (CodeArtifact) who only stocks health-inspected ingredients. If a new batch of "tomato-sauce" comes from the internet, it gets inspected and approved first before chefs can use it.');
+  s+=`<div class="sim-area"><div class="sim-title">Internal package registry</div>
+  ${packages.map(p=>`<div class="order-item"><div style="flex:1"><div style="font-weight:500">${p.name}</div><div style="font-size:12px;color:var(--color-text-tertiary)">v${p.ver} · ${p.dl} downloads</div></div><button class="btn btn-gray" style="padding:3px 9px;font-size:12px" onclick="pullPkg('${p.name}')">Pull</button></div>`).join('')}
+  <div class="btn-row"><button class="btn btn-success" onclick="publishPkg()">Publish new ingredient</button></div>
+  <div class="log" style="margin-top:8px">${logHtml()}</div></div>`;
+  return s;
+}
+function pullPkg(n){buildLog=[{msg:`[INFO] Resolving ${n}... found in CodeArtifact (upstream cache hit)`,cls:'ok'},{msg:`[INFO] Pulling ${n} — OK`,cls:'ok'}];rerender();}
+function publishPkg(){packages.unshift({name:'hot-sauce',ver:'1.0.0',dl:0});addTrail('CodeArtifact','PublishPackage',{pkg:'hot-sauce'});rerender();}
+
+/* ─── BEANSTALK ─── */
+function rBeanstalk(){
+  let s=header('Elastic Beanstalk — The Franchise Kit',
+    'PaaS: auto-provisions ALB + EC2 + ASG + RDS. Supports rolling, blue/green.',
+    '.ebextensions for custom config; Saved configs for reproducible envs');
+  s+=metaphor('Opening a new restaurant from scratch is complex. Beanstalk is the franchise kit: hand it your recipe book and it sets up the full kitchen — ovens, tables, staff — automatically. You just cook.');
+  s+=`<div class="sim-area"><div class="sim-title">Deploy a new environment</div>
+  <div style="font-size:13px;color:var(--color-text-secondary);margin-bottom:10px">Beanstalk auto-provisions: ALB + EC2 (2x) + Auto Scaling group + optional RDS</div>
+  <button class="btn btn-primary" onclick="deployEB()">Deploy pizza-app v2</button>
+  <div class="log" style="margin-top:8px">${logHtml()}</div></div>
+  <div class="sim-area"><div class="sim-title">Exam tips</div>
+  <div class="info-grid">
+    <div class="info-card"><div class="info-card-title">.ebextensions</div><div class="info-card-body">YAML config files in your code bundle that customize EC2 setup, add cron jobs, install packages.</div></div>
+    <div class="info-card"><div class="info-card-title">Blue/green via CNAME swap</div><div class="info-card-body">Beanstalk blue/green swaps the environment URL — instant with easy rollback.</div></div>
+    <div class="info-card"><div class="info-card-title">RDS best practice</div><div class="info-card-body">For prod, create RDS OUTSIDE Beanstalk — deleting env won't delete your database.</div></div>
+    <div class="info-card"><div class="info-card-title">Saved configs</div><div class="info-card-body">Save your env config to S3 and re-apply it — reproducible environments.</div></div>
+  </div></div>`;
+  return s;
+}
+function deployEB(){buildLog=[];const steps=[{msg:'[EB] Creating EC2 instances (2x)...',cls:'info'},{msg:'[EB] Attaching ALB and target group...',cls:'info'},{msg:'[EB] Configuring Auto Scaling (min:2 max:8)...',cls:'info'},{msg:'[EB] Deploying pizza-app-v2.zip from S3...',cls:'info'},{msg:'[EB] .ebextensions: Installing nginx config',cls:'ok'},{msg:'[EB] Health check: HEALTHY',cls:'ok'},{msg:'[EB] Live at pizza-app.elasticbeanstalk.com',cls:'ok'}];steps.forEach((s,i)=>setTimeout(()=>{buildLog.push(s);rerender();},i*600));}
+
+/* ─── CFN ─── */
+function rCfn(){
+  let s=header('CloudFormation — The Blueprint',
+    'IaC with JSON/YAML. Stacks, StackSets, drift detection, change sets, rollbacks.',
+    'StackSets: deploy one template across multiple accounts and regions simultaneously');
+  s+=metaphor('Before building a restaurant, you draw every detail on paper. CloudFormation is that architectural blueprint in YAML. AWS builds exactly what the blueprint says. Drift detection is the inspector who compares the real building to the paper plan and flags differences.');
+  s+=`<div class="sim-area"><div class="sim-title">Stack management</div>
+  <div class="btn-row">
+    <button class="btn btn-primary" onclick="cfnDeploy()">Deploy stack</button>
+    <button class="btn btn-amber" onclick="cfnDrift()">Detect drift</button>
+    <button class="btn btn-gray" onclick="cfnChangeset()">Create change set</button>
+    <button class="btn btn-teal" onclick="cfnStackSet()">Deploy StackSet (multi-account)</button>
+  </div><div class="log" style="margin-top:8px">${logHtml()}</div></div>`;
+  return s;
+}
+function cfnDeploy(){buildLog=[{msg:'[CFN] Creating pizza-restaurant stack...',cls:'info'},{msg:'[CFN] PizzaOven EC2: CREATE_COMPLETE',cls:'ok'},{msg:'[CFN] DeliveryFleet ASG: CREATE_COMPLETE',cls:'ok'},{msg:'[CFN] Stack: CREATE_COMPLETE',cls:'ok'}];rerender();}
+function cfnDrift(){buildLog=[{msg:'[CFN] Checking drift on pizza-restaurant...',cls:'info'},{msg:'[CFN] PizzaOven: IN_SYNC',cls:'ok'},{msg:'[CFN] DeliveryFleet: DRIFTED — MaxSize changed manually to 3!',cls:'err'},{msg:'[CFN] Recommendation: re-apply stack or update template.',cls:'warn'}];rerender();}
+function cfnChangeset(){buildLog=[{msg:'[CFN] Change set: update oven t3.medium → t3.large',cls:'info'},{msg:'[CFN] Resources to modify: 1 (PizzaOven)',cls:'ok'},{msg:'[CFN] No resources deleted. Safe to execute.',cls:'ok'}];rerender();}
+function cfnStackSet(){buildLog=[{msg:'[CFN] StackSet: pizza-restaurant',cls:'info'},{msg:'[CFN] Deploying to account 111111111111 / us-east-1...',cls:'ok'},{msg:'[CFN] Deploying to account 222222222222 / ap-southeast-1...',cls:'ok'},{msg:'[CFN] Deploying to account 333333333333 / eu-west-1...',cls:'ok'},{msg:'[CFN] StackSet deployed to 3 accounts simultaneously.',cls:'ok'}];rerender();}
+
+/* ─── CDK ─── */
+function rCdk(){
+  let s=header('CDK — The Smart Blueprint Tool',
+    'Define infra in Python/TypeScript/Java. Synthesizes to CloudFormation. CDK Pipelines.',
+    'CDK Pipelines: self-mutating CI/CD pipeline defined entirely in code');
+  s+=metaphor('Drawing blueprints by hand is tedious. CDK lets you say "I want 3 ovens with auto-scaling" in Python, and it writes the 800-line technical blueprint (CloudFormation) for you automatically. If you change your mind, just update one line of Python.');
+  s+=`<div class="sim-area">
+  <div class="log" style="max-height:110px;margin-bottom:8px">
+<div class="info">from aws_cdk import Stack, aws_ec2 as ec2, aws_autoscaling as asg</div>
+<div class="info">class PizzaStack(Stack):</div>
+<div class="info">  def __init__(self, scope, id):</div>
+<div class="info">    vpc = ec2.Vpc(self, "PizzaVpc")</div>
+<div class="info">    fleet = asg.AutoScalingGroup(self, "Fleet",</div>
+<div class="info">      instance_type=ec2.InstanceType("t3.medium"),</div>
+<div class="info">      min_capacity=2, max_capacity=10)</div>
+  </div>
+  <div class="btn-row">
+    <button class="btn btn-primary" onclick="cdkSynth()">cdk synth</button>
+    <button class="btn btn-teal" onclick="cdkDiff()">cdk diff (what changes?)</button>
+    <button class="btn btn-amber" onclick="cdkDeploy()">cdk deploy</button>
+  </div><div class="log" style="margin-top:8px">${logHtml()}</div></div>`;
+  return s;
+}
+function cdkSynth(){buildLog=[{msg:'[CDK] Synthesizing PizzaStack...',cls:'info'},{msg:'[CDK] Generated CloudFormation template: 847 lines',cls:'ok'},{msg:'[CDK] Resources: VPC, EC2, ASG, SG x2, IAM roles',cls:'ok'},{msg:'[CDK] cdk.out/ ready.',cls:'ok'}];rerender();}
+function cdkDiff(){buildLog=[{msg:'[CDK] Comparing stack to deployed state...',cls:'info'},{msg:'[CDK] ~ Update: AutoScalingGroup MaxSize 8 → 10',cls:'warn'},{msg:'[CDK] + Add: CloudWatchAlarm (CPU > 70%)',cls:'ok'},{msg:'[CDK] No destructive changes.',cls:'ok'}];rerender();}
+function cdkDeploy(){buildLog=[{msg:'[CDK] Deploying PizzaStack...',cls:'info'},{msg:'[CDK] Uploading template to S3...',cls:'info'},{msg:'[CDK] CloudFormation: UPDATE_COMPLETE',cls:'ok'},{msg:'[CDK] Outputs: LoadBalancerDNS = alb-xyz.amazonaws.com',cls:'ok'}];rerender();}
+
+/* ─── SSM ─── */
+function rSsm(){
+  let s=header('Systems Manager — The Operations Manager',
+    'Patch, run commands, manage secrets, automate ops across fleets. Successor to OpsWorks.',
+    'Parameter Store: free (standard) or $0.05/10k API calls (advanced). Secrets Manager: $0.40/secret/month');
+  s+=metaphor('You have 50 restaurant branches. The ops manager (SSM) can update all 50 kitchen rulebooks simultaneously, fix broken equipment remotely (Run Command), and store every secret WiFi password in a locked safe (Parameter Store) so no chef needs to know them personally.');
+  s+=`<div class="sim-area"><div class="sim-title">Parameter Store — secret safe</div>
+  ${ssmParams.map(p=>`<div class="order-item"><code style="font-size:12px;flex:1">${p.key}</code><span style="font-size:12px">${p.val}</span><span class="tag">${p.type}</span></div>`).join('')}
+  <div class="btn-row">
+    <button class="btn btn-primary" onclick="ssmRun()">Run Command on 50 branches</button>
+    <button class="btn btn-amber" onclick="ssmPatch()">Apply patch baseline</button>
+    <button class="btn btn-teal" onclick="ssmAutomation()">Run Automation document</button>
+  </div><div class="log" style="margin-top:8px">${logHtml()}</div></div>`;
+  return s;
+}
+function ssmRun(){buildLog=[{msg:'[SSM] Run Command: AWS-UpdateSSMAgent on 50 instances',cls:'info'},{msg:'[SSM] Branch-1: SUCCESS',cls:'ok'},{msg:'[SSM] Branch-2: SUCCESS',cls:'ok'},{msg:'[SSM] 50/50 complete. No failures.',cls:'ok'}];rerender();}
+function ssmPatch(){buildLog=[{msg:'[SSM] Patch baseline: AWSManagedDefaultPatchBaseline',cls:'info'},{msg:'[SSM] Scanning 50 instances for missing patches...',cls:'info'},{msg:'[SSM] 12 instances non-compliant. Installing 3 patches...',cls:'warn'},{msg:'[SSM] All 50 instances compliant.',cls:'ok'}];rerender();}
+function ssmAutomation(){buildLog=[{msg:'[SSM] Running: AWS-RestartEC2Instance Automation',cls:'info'},{msg:'[SSM] Step 1: verifyInstanceRunning — OK',cls:'ok'},{msg:'[SSM] Step 2: stopInstance — OK',cls:'ok'},{msg:'[SSM] Step 3: startInstance — OK',cls:'ok'},{msg:'[SSM] Automation complete.',cls:'ok'}];rerender();}
+
+/* ─── SSM APP MANAGER (replaces OpsWorks) ─── */
+function rSsmApp(){
+  let s=header('SSM Application Manager — The Kitchen Standards Board',
+    'AWS-recommended OpsWorks replacement. Groups resources into apps, enforces compliance.',
+    'OpsWorks reached EOL May 26 2024 — fully disabled for all customers');
+  s+=corrBox('<b>OpsWorks is gone.</b> AWS OpsWorks Stacks, OpsWorks for Chef Automate, and OpsWorks for Puppet Enterprise all reached end of life by May 26, 2024. The console, API, CLI and CloudFormation resources are fully disabled. <b>AWS officially recommends Systems Manager Application Manager as the replacement.</b> The DevOps Pro exam (DOP-C02) still mentions OpsWorks in the content outline but maps its use cases to SSM — know this distinction.');
+  s+=metaphor('OpsWorks was the old head chef\'s cookbook (Chef/Puppet). It\'s now retired. The new Standards Board (SSM Application Manager) groups all your restaurant resources (EC2, RDS, Lambda) into one "Pizza App" view, tracks their health, and enforces compliance rules — no special cookbook language needed.');
+  s+=`<div class="sim-area"><div class="sim-title">Application Manager — grouped resource view</div>
+  ${appMgrApps.map(a=>`<div class="order-item">
+    <div style="flex:1"><div style="font-weight:500">${a.name}</div><div style="font-size:12px;color:var(--color-text-tertiary)">${a.stacks} stacks · ${a.healthy}/${a.stacks} healthy</div></div>
+    <span class="pill ${a.healthy===a.stacks?'pill-green':'pill-amber'}">${a.healthy===a.stacks?'healthy':'degraded'}</span>
+  </div>`).join('')}
+  <div class="btn-row">
+    <button class="btn btn-primary" onclick="appMgrRunbook()">Run remediation runbook</button>
+    <button class="btn btn-amber" onclick="appMgrCompliance()">Check OpsCenter issues</button>
+  </div><div class="log" style="margin-top:8px">${logHtml()}</div></div>
+  <div class="sim-area"><div class="sim-title">Migration from OpsWorks → SSM</div>
+  <div class="info-grid">
+    <div class="info-card"><div class="info-card-title">OpsWorks Stacks → SSM</div><div class="info-card-body">Use AWS-provided migration script to convert OpsWorks layers into SSM Application Manager apps.</div></div>
+    <div class="info-card"><div class="info-card-title">Chef cookbooks → SSM Documents</div><div class="info-card-body">Rewrite Chef recipes as SSM Automation documents or State Manager associations.</div></div>
+    <div class="info-card"><div class="info-card-title">Exam note</div><div class="info-card-body">If the exam shows an OpsWorks scenario, the correct modern answer will involve SSM or Config.</div></div>
+    <div class="info-card"><div class="info-card-title">State Manager</div><div class="info-card-body">Ensures instances stay in a defined state — like Chef "convergence" but via SSM Documents.</div></div>
+  </div></div>`;
+  return s;
+}
+function appMgrRunbook(){buildLog=[{msg:'[SSM] Running runbook: RestartDegradedService',cls:'info'},{msg:'[SSM] Target: pizza-delivery app',cls:'info'},{msg:'[SSM] Step 1: CheckServiceHealth — DEGRADED',cls:'warn'},{msg:'[SSM] Step 2: RestartService — SUCCESS',cls:'ok'},{msg:'[SSM] Step 3: ValidateHealth — HEALTHY',cls:'ok'},{msg:'[SSM] Runbook complete. OpsCenter issue resolved.',cls:'ok'}];rerender();}
+function appMgrCompliance(){buildLog=[{msg:'[SSM] OpsCenter: 2 open issues found',cls:'warn'},{msg:'[SSM] Issue #1: pizza-delivery web-tier latency >2s',cls:'warn'},{msg:'[SSM] Issue #2: pizza-payments SSL cert expires in 7 days',cls:'err'},{msg:'[SSM] Suggested runbook: RenewSSLCert — click to approve',cls:'info'}];rerender();}
+
+/* ─── ECS ─── */
+function rEcs(){
+  let s=header('ECS — The Container Kitchen',
+    'Managed container orchestration. Task definitions, services, Fargate or EC2 launch type.',
+    'Blue/green with CodeDeploy: most common exam pattern for ECS deployments');
+  s+=metaphor('Each dish cooked in its own sealed lunchbox (Docker container) so flavors never mix. ECS decides which chef (EC2/Fargate) cooks which lunchbox and how many to make. If one lunchbox leaks, only that one is replaced.');
+  s+=`<div class="sim-area"><div class="sim-title">Running containers (tasks)</div>
+  ${containers.map(c=>`<div class="order-item"><code style="font-size:12px;min-width:70px">${c.id}</code><span class="pill ${c.status==='running'?'pill-green':'pill-red'}">${c.status}</span><div class="progress-bar" style="margin:0 8px"><div class="progress-fill" style="width:${c.cpu}%;background:${c.cpu>70?'#E24B4A':'#185FA5'}"></div></div><span style="font-size:12px;color:var(--color-text-tertiary)">${c.cpu}% CPU</span></div>`).join('')}
+  <div class="btn-row">
+    <button class="btn btn-primary" onclick="ecsScale()">Scale up (+1 task)</button>
+    <button class="btn btn-danger" onclick="ecsKill()">Kill task (simulate crash)</button>
+    <button class="btn btn-gray" onclick="ecsRestart()">ECS self-heals (restarts)</button>
+  </div></div>`;
+  return s;
+}
+function ecsScale(){containers.push({id:'web-'+(containers.length+1),status:'running',cpu:Math.floor(Math.random()*40+10)});rerender();}
+function ecsKill(){if(containers.length>1){containers[0].status='stopped';rerender();}}
+function ecsRestart(){containers.forEach(c=>c.status='running');rerender();}
+
+/* ─── EKS ─── */
+function rEks(){
+  let s=header('EKS — The Multi-Branch Kitchen Network',
+    'Managed Kubernetes. Node groups, Helm charts, IRSA, pod auto-scaling via CloudWatch.',
+    'IRSA: IAM Roles for Service Accounts — fine-grained pod-level IAM permissions');
+  s+=metaphor('EKS is like ECS but using the global Kubernetes standard. Any chef trained on the "international kitchen system" (Kubernetes) can work in your restaurant without retraining. You can also move your kitchen to a different cloud provider someday.');
+  s+=`<div class="sim-area">
+  <div class="log" style="margin-bottom:8px">
+<div class="info">$ kubectl get pods -n pizza</div>
+<div class="ok">pizza-web-5d8f9   1/1  Running  0  5m</div>
+<div class="ok">pizza-web-7a2b1   1/1  Running  0  5m</div>
+<div class="ok">pizza-worker-1    1/1  Running  0  3m</div>
+  </div>
+  <div class="btn-row">
+    <button class="btn btn-primary" onclick="eksRollout()">kubectl rollout</button>
+    <button class="btn btn-amber" onclick="eksHelm()">Helm deploy</button>
+    <button class="btn btn-teal" onclick="eksIRSA()">Configure IRSA</button>
+  </div><div class="log" style="margin-top:8px">${logHtml()}</div></div>`;
+  return s;
+}
+function eksRollout(){buildLog=[{msg:'[K8s] Rolling update: pizza-web Deployment...',cls:'info'},{msg:'[K8s] pizza-web-new-1: Running',cls:'ok'},{msg:'[K8s] pizza-web-old-1: Terminated',cls:'warn'},{msg:'[K8s] 2/2 pods updated.',cls:'ok'}];rerender();}
+function eksHelm(){buildLog=[{msg:'[Helm] Installing pizza-chart v3.1.0...',cls:'info'},{msg:'[Helm] ConfigMap: created',cls:'ok'},{msg:'[Helm] Deployment: created',cls:'ok'},{msg:'[Helm] DEPLOYED.',cls:'ok'}];rerender();}
+function eksIRSA(){buildLog=[{msg:'[IRSA] Creating OIDC provider for EKS cluster...',cls:'info'},{msg:'[IRSA] Creating IAM role: pizza-s3-role',cls:'ok'},{msg:'[IRSA] Binding role to service account: pizza-sa',cls:'ok'},{msg:'[IRSA] Pod pizza-worker can now access S3 without hardcoded keys.',cls:'ok'}];rerender();}
+
+/* ─── LAMBDA ─── */
+function rLambda(){
+  let s=header('Lambda — The On-Demand Barista',
+    'Serverless functions. Versions, aliases, traffic shifting. Pay per 1ms.',
+    'Canary deployment via aliases: route 10% to new version, 90% to old version');
+  s+=metaphor('You don\'t hire a full-time barista for one coffee. Lambda summons a barista, they make the coffee, disappear, and you pay 30ms of salary. 1000 simultaneous orders? 1000 baristas appear instantly from nowhere.');
+  s+=`<div class="sim-area"><div class="sim-title">Invoke functions</div>
+  <div class="metric-row">
+    <div class="metric"><div class="metric-val" id="lam-inv">${lamInv}</div><div class="metric-lbl">Invocations</div></div>
+    <div class="metric"><div class="metric-val" id="lam-dur">—</div><div class="metric-lbl">Duration</div></div>
+    <div class="metric"><div class="metric-val" id="lam-cost">$${lamCost.toFixed(7)}</div><div class="metric-lbl">Cost</div></div>
+  </div>
+  <div class="btn-row">
+    <button class="btn btn-primary" onclick="invokeLambda('ProcessOrder')">ProcessOrder</button>
+    <button class="btn btn-amber" onclick="invokeLambda('SendSMS')">SendSMS</button>
+    <button class="btn btn-teal" onclick="lambdaAlias()">Deploy canary alias (10% v2)</button>
+  </div></div>`;
+  return s;
+}
+function invokeLambda(fn){lamInv++;const dur=80+Math.floor(Math.random()*400);lamCost+=0.0000002;const inv=document.getElementById('lam-inv');const durEl=document.getElementById('lam-dur');const cost=document.getElementById('lam-cost');if(inv)inv.textContent=lamInv;if(durEl)durEl.textContent=dur+'ms';if(cost)cost.textContent='$'+lamCost.toFixed(7);addTrail('Lambda','Invoke',{fn,dur});}
+function lambdaAlias(){buildLog=[{msg:'[Lambda] Publishing new version: v2',cls:'info'},{msg:'[Lambda] Updating alias: pizza-live',cls:'info'},{msg:'[Lambda] pizza-live → 90% v1, 10% v2',cls:'ok'},{msg:'[Lambda] Monitoring error rate for canary...',cls:'ok'},{msg:'[Lambda] Error rate 0.1% — healthy. Shift to 100% v2.',cls:'ok'}];rerender();}
+
+/* ─── ASG ─── */
+function rAsg(){
+  let s=header('Auto Scaling — The Staffing Agency',
+    'EC2 Auto Scaling. Target tracking, step, scheduled policies. Lifecycle hooks.',
+    'Lifecycle hooks: pause launch/terminate to run scripts before instance goes live');
+  s+=metaphor('Friday nights get crazy. The agency (ASG) watches the queue length (CPU %) and calls in extra staff when busy, sends them home when quiet. Lifecycle hooks are like the agency saying "wait in the lobby while we run a background check" before sending staff to the kitchen.');
+  s+=`<div class="sim-area">
+  <div class="metric-row">
+    <div class="metric"><div class="metric-val" id="asg-inst">${instances}</div><div class="metric-lbl">Instances</div></div>
+    <div class="metric"><div class="metric-val">${Math.floor(35+instances*5)}%</div><div class="metric-lbl">Avg CPU</div></div>
+  </div>
+  <div class="btn-row">
+    <button class="btn btn-danger" onclick="simulateSpike()">Friday night rush (scale out)</button>
+    <button class="btn btn-gray" onclick="simulateQuiet()">Tuesday morning (scale in)</button>
+    <button class="btn btn-teal" onclick="lifecycleHook()">Trigger lifecycle hook</button>
+  </div><div class="log" style="margin-top:8px">${logHtml()}</div></div>`;
+  return s;
+}
+function simulateSpike(){buildLog=[{msg:'[ASG] CPU alarm: 85% > threshold 70%',cls:'warn'},{msg:'[ASG] Scaling out: 2 → 5 instances',cls:'info'},{msg:'[ASG] 3 new instances: lifecycle hook triggered',cls:'ok'},{msg:'[ASG] Hook: running bootstrap script...',cls:'ok'},{msg:'[ASG] Instances COMPLETE. CPU: 41%',cls:'ok'}];instances=5;rerender();}
+function simulateQuiet(){buildLog=[{msg:'[ASG] CPU alarm: 8% < threshold 20%',cls:'info'},{msg:'[ASG] Scaling in: 5 → 2 instances',cls:'info'},{msg:'[ASG] Min capacity maintained: 2',cls:'ok'}];instances=2;rerender();}
+function lifecycleHook(){buildLog=[{msg:'[ASG] New instance launching: i-0new1234',cls:'info'},{msg:'[ASG] Lifecycle hook: EC2_INSTANCE_LAUNCHING',cls:'info'},{msg:'[ASG] Hook pauses instance in Pending:Wait state',cls:'ok'},{msg:'[ASG] Running: install-app.sh, join-cluster.sh...',cls:'ok'},{msg:'[ASG] complete-lifecycle-action: CONTINUE',cls:'ok'},{msg:'[ASG] Instance now InService.',cls:'ok'}];rerender();}
+
+/* ─── CW ─── */
+function rCw(){
+  const ac=alarmState==='ok'?'alarm-ok':alarmState==='warn'?'alarm-warn':'alarm-crit';
+  const at=alarmState==='ok'?'All systems normal — no alarms firing':'Error rate elevated! CloudWatch alarm TRIGGERED.';
+  let s=header('CloudWatch — The Restaurant Dashboard',
+    'Metrics, alarms, Logs Insights, Container Insights, dashboards, anomaly detection.',
+    'Contributor Insights: find top 10 IPs causing most errors — exam scenario');
+  s+=metaphor('A live screen in the back office shows every metric: orders/min, oven temp, delivery times. Anomaly detection draws a band of "normal" — anything outside the band triggers an alarm. Logs Insights lets you ask questions like "which chef made the most errors today?"');
+  s+=`<div class="sim-area">
+  <div class="metric-row">
+    <div class="metric"><div class="metric-val">${cwMetrics.orders}</div><div class="metric-lbl">Orders today</div></div>
+    <div class="metric"><div class="metric-val">${cwMetrics.errors}</div><div class="metric-lbl">Failures</div></div>
+    <div class="metric"><div class="metric-val">${cwMetrics.latency}ms</div><div class="metric-lbl">Avg latency</div></div>
+  </div>
+  <div class="alarm ${ac}"><span class="alarm-dot" style="background:${alarmState==='ok'?'#3B6D11':alarmState==='warn'?'#854F0B':'#A32D2D'}"></span>${at}</div>
+  <div class="btn-row">
+    <button class="btn btn-primary" onclick="addOrder('Margherita')">Place order (generate metric)</button>
+    <button class="btn btn-danger" onclick="simulateError()">Simulate errors (trigger alarm)</button>
+    <button class="btn btn-gray" onclick="resetMetrics()">Reset</button>
+  </div></div>`;
+  return s;
+}
+function simulateError(){cwMetrics.errors+=2;cwMetrics.latency=1800;checkAlarm();rerender();}
+function resetMetrics(){cwMetrics={orders:0,errors:0,latency:320};alarmState='ok';rerender();}
+
+/* ─── XRAY ─── */
+function rXray(){
+  let s=header('X-Ray — The Order Receipt Trail',
+    'Distributed tracing. Service map, trace analysis, groups and insights.',
+    'X-Ray groups: filter traces by annotation (e.g. user=premium) — common exam scenario');
+  s+=metaphor('A customer complains their order took 47 min. X-Ray shows the exact receipt trail — 2 min waiting → 18 min oven → 20 min driver → 7 min at door. You can see exactly which step was slow, and whether it\'s always slow or just for certain customers.');
+  s+=`<div class="sim-area">
+  <button class="btn btn-primary" onclick="traceOrder()" style="margin-bottom:12px">Trace next order</button>
+  ${traces.length?`<div>${traces.map(t=>`<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;font-size:13px"><div style="width:130px;color:var(--color-text-secondary)">${t.step}</div><div class="progress-bar"><div class="progress-fill" style="width:${Math.min(100,t.ms/30)}%;background:${t.ms>500?'#E24B4A':t.ms>200?'#EF9F27':'#639922'}"></div></div><div style="width:55px;text-align:right;font-weight:500;color:${t.ms>500?'#A32D2D':t.ms>200?'#854F0B':'#3B6D11'}">${t.ms}ms</div></div>`).join('')}
+  <div style="font-size:12px;color:var(--color-text-tertiary);margin-top:4px">Total: ${traces.reduce((a,t)=>a+t.ms,0)}ms · Bottleneck: ${traces.sort((a,b)=>b.ms-a.ms)[0].step}</div></div>`:'<span style="font-size:13px;color:var(--color-text-tertiary)">Click above to generate a trace.</span>'}
+  </div>`;
+  return s;
+}
+function traceOrder(){const steps=['API Gateway','IAM auth','Order service','DynamoDB query','Payment svc','Delivery assign'];traces=steps.map(s=>({step:s,ms:s==='DynamoDB query'&&Math.random()<0.5?580+Math.floor(Math.random()*300):40+Math.floor(Math.random()*180)}));rerender();}
+
+/* ─── EVENTBRIDGE ─── */
+function rEb(){
+  let s=header('EventBridge — The Restaurant Intercom',
+    'Event bus: route events from 200+ AWS services to targets. Schema registry, pipes.',
+    'EventBridge Pipes: point-to-point SQS/Kinesis → Lambda with filtering, no custom code');
+  s+=metaphor('When a new order arrives, the intercom (EventBridge) simultaneously announces to: oven team, packaging, delivery, and billing — all at once. No one has to manually call each department. You can also schedule announcements ("reminder at 6pm to prep Friday specials").');
+  s+=`<div class="sim-area">
+  <div class="btn-row" style="margin-bottom:12px">
+    <button class="btn btn-primary" onclick="addOrder('Pepperoni')">Place order (fire event)</button>
+    <button class="btn btn-amber" onclick="fireEvt('LowStock','Cheese below 10kg')">Fire inventory alert</button>
+    <button class="btn btn-teal" onclick="scheduleEvent()">Scheduled rule (6pm prep reminder)</button>
+  </div>
+  <div class="sim-title">Event log</div>
+  <div>${events.slice(0,5).map(e=>`<div class="order-item"><span class="pill pill-blue">${e.type}</span><div style="flex:1;font-size:13px">${e.msg}</div><span style="font-size:11px;color:var(--color-text-tertiary)">${e.time}</span></div>`).join('')||'<div style="font-size:13px;color:var(--color-text-tertiary);padding:8px">No events yet.</div>'}
+  </div></div>`;
+  return s;
+}
+function fireEvt(t,m){addEvent(m,t);rerender();}
+function scheduleEvent(){addEvent('Scheduled rule fired: prep-friday-specials → Lambda invoked','schedule');rerender();}
+
+/* ─── CONFIG ─── */
+function rConfig(){
+  let s=header('AWS Config — The Health Inspector',
+    'Tracks all resource config changes. Config rules, conformance packs, auto-remediation.',
+    'Conformance packs: bundle of rules deployed as a single CloudFormation template');
+  s+=metaphor('The inspector visits daily checking: fridge at right temp? Chefs wearing gloves? Exits clear? If anything drifts from the rules, Config logs it with a timestamp and can auto-fix it via SSM Automation. You can also see what the fridge setting was on any specific day.');
+  s+=`<div class="sim-area">
+  ${configRules.map((r,i)=>`<div class="order-item"><span class="pill ${r.status==='ok'?'pill-green':'pill-amber'}">${r.status==='ok'?'COMPLIANT':'NON-COMPLIANT'}</span><div style="flex:1">${r.name}</div>${r.status!=='ok'?`<button class="btn btn-gray" style="padding:3px 8px;font-size:12px" onclick="fixRule(${i})">Auto-remediate (SSM)</button>`:''}</div>`).join('')}
+  <div class="btn-row" style="margin-top:8px">
+    <button class="btn btn-amber" onclick="driftConfig()">Simulate config drift</button>
+    <button class="btn btn-teal" onclick="configHistory()">View config history (time travel)</button>
+  </div><div class="log" style="margin-top:8px">${logHtml()}</div></div>`;
+  return s;
+}
+function driftConfig(){configRules[1].status='drift';configRules[2].status='drift';rerender();}
+function fixRule(i){configRules[i].status='ok';buildLog=[{msg:`[Config] Auto-remediation: ${configRules[i].name}`,cls:'info'},{msg:`[Config] Triggering SSM Automation: AWS-ConfigRemediation`,cls:'ok'},{msg:`[Config] Rule now COMPLIANT.`,cls:'ok'}];rerender();}
+function configHistory(){buildLog=[{msg:'[Config] Fetching config history for PizzaOven EC2...',cls:'info'},{msg:'[Config] 2026-04-01: InstanceType = t3.medium',cls:'ok'},{msg:'[Config] 2026-04-03: SecurityGroup sg-abc added (who did this?)',cls:'warn'},{msg:'[Config] 2026-04-05: InstanceType = t3.large (current)',cls:'ok'}];rerender();}
+
+/* ─── TRAIL ─── */
+function rTrail(){
+  let s=header('CloudTrail — The Security Camera',
+    'Logs every AWS API call: who, what, when, from where. S3 + CloudWatch integration.',
+    'CloudTrail Insights: auto-detect unusual API call volume (exam scenario)');
+  s+=metaphor('Every action in your restaurant is on CCTV (CloudTrail): who opened the safe, who changed the recipe, who let a stranger into the kitchen. If something goes wrong, you rewind the tape and see the exact moment and person. You can also set motion alarms (Insights) for unusual activity.');
+  s+=`<div class="sim-area">
+  ${trailLog.length?trailLog.map(t=>`<div class="order-item" style="flex-direction:column;align-items:flex-start;gap:2px"><div style="display:flex;gap:7px;align-items:center;width:100%"><span class="tag">${t.svc}</span><span style="font-weight:500;font-size:13px">${t.action}</span><span style="margin-left:auto;font-size:11px;color:var(--color-text-tertiary)">${t.time}</span></div><div style="font-size:12px;color:var(--color-text-tertiary)">${t.user} · ${t.detail}</div></div>`).join(''):`<div style="font-size:13px;color:var(--color-text-tertiary);padding:8px">No trail events yet. Interact with other services to generate events.</div>`}
+  <div class="btn-row" style="margin-top:8px">
+    <button class="btn btn-amber" onclick="trailInsight()">CloudTrail Insights alert</button>
+  </div><div class="log" style="margin-top:8px">${logHtml()}</div></div>`;
+  return s;
+}
+function trailInsight(){buildLog=[{msg:'[CloudTrail Insights] Unusual API activity detected!',cls:'warn'},{msg:'[Insights] DeleteSecurityGroup called 47x in 10 min (baseline: 2/hr)',cls:'err'},{msg:'[Insights] Source IP: 185.220.101.x (unknown)',cls:'err'},{msg:'[Insights] Alert sent to CloudWatch → SNS → your phone',cls:'ok'}];rerender();}
+
+/* ─── IAM ─── */
+function rIam(){
+  let s=header('IAM — The Key Card System',
+    'Roles, policies, permission boundaries, SCPs, cross-account access.',
+    'SCPs (Service Control Policies): org-wide guardrails that even admins cannot bypass');
+  s+=metaphor('Not everyone gets every key. Barista: coffee machine only. Chef: kitchen + oven. Manager: everything. The SCP is like a master security rule set by HQ that even the local manager cannot override — e.g. "no one can delete the safe, ever."');
+  s+=`<div class="sim-area">
+  ${iamRoles.map(r=>`<div class="order-item"><div style="font-weight:500;min-width:72px">${r.name}</div><div class="tag-row" style="flex:1;margin:0">${r.perms.map(p=>`<span class="tag">${p}</span>`).join('')}</div></div>`).join('')}
+  <div class="btn-row" style="margin-top:8px">
+    <button class="btn btn-danger" onclick="iamDeny()">Barista tries to open safe (DENY)</button>
+    <button class="btn btn-success" onclick="iamAllow()">Manager opens safe (ALLOW)</button>
+    <button class="btn btn-purple" onclick="iamSCP()">SCP blocks everyone from deleting S3</button>
+  </div><div class="log" style="margin-top:8px">${logHtml()}</div></div>`;
+  return s;
+}
+function iamDeny(){buildLog=[{msg:'[IAM] User: Barista → Action: OpenSafe',cls:'info'},{msg:'[IAM] Evaluating identity-based policies...',cls:'info'},{msg:'[IAM] DENY — no safe permission in Barista policy',cls:'err'},{msg:'[IAM] Access denied. Event logged to CloudTrail.',cls:'err'}];addTrail('IAM','AssumeRole',{user:'Barista',result:'DENY'});rerender();}
+function iamAllow(){buildLog=[{msg:'[IAM] User: Manager → Action: OpenSafe',cls:'info'},{msg:'[IAM] Policy evaluation: ALLOW (admin)',cls:'ok'},{msg:'[IAM] Access granted.',cls:'ok'}];addTrail('IAM','AssumeRole',{user:'Manager',result:'ALLOW'});rerender();}
+function iamSCP(){buildLog=[{msg:'[SCP] Organization policy: DenyS3BucketDeletion',cls:'info'},{msg:'[SCP] Manager tries: DeleteBucket pizza-artifacts',cls:'warn'},{msg:'[SCP] DENY — SCP overrides even admin policies',cls:'err'},{msg:'[SCP] SCPs are evaluated BEFORE identity policies.',cls:'ok'}];rerender();}
+
+/* ─── ROUTE 53 ─── */
+function rR53(){
+  let s=header('Route 53 — The Street Sign System',
+    'DNS + health checks + routing policies: weighted, latency, failover, geolocation, multivalue.',
+    'Active-active vs active-passive failover — very common DOP-C02 scenario');
+  s+=metaphor('When a customer searches for your restaurant, Route 53 is the street sign pointing them to the right address. If the main building burns down (fails health check), Route 53 automatically points everyone to the backup branch within 60 seconds.');
+  s+=`<div class="sim-area">
+  ${r53Records.map((r,i)=>`<div class="order-item"><code style="font-size:12px;min-width:110px">${r.name}</code><span class="tag">${r.type}</span><div style="flex:1;font-size:12px;color:var(--color-text-secondary);padding:0 8px">${r.target}</div><span class="pill ${r.health==='healthy'?'pill-green':'pill-red'}">${r.health}</span></div>`).join('')}
+  <div class="btn-row" style="margin-top:8px">
+    <button class="btn btn-danger" onclick="r53Failover()">Main site fails (auto-failover)</button>
+    <button class="btn btn-primary" onclick="r53Weighted()">Weighted routing (A/B)</button>
+    <button class="btn btn-gray" onclick="r53Restore()">Restore</button>
+  </div><div class="log" style="margin-top:8px">${logHtml()}</div></div>`;
+  return s;
+}
+function r53Failover(){r53Records[0].health='unhealthy';buildLog=[{msg:'[R53] Health check FAIL: pizza.com (203.0.113.10)',cls:'err'},{msg:'[R53] Failover policy: routing to backup.pizza.com',cls:'warn'},{msg:'[R53] DNS TTL: 60s. Customers redirected automatically.',cls:'ok'},{msg:'[R53] Zero visible outage to end users.',cls:'ok'}];rerender();}
+function r53Weighted(){buildLog=[{msg:'[R53] Weighted routing active:',cls:'info'},{msg:'[R53] pizza.com → v1 (weight 80 = 80%)',cls:'ok'},{msg:'[R53] pizza.com → v2 (weight 20 = 20%)',cls:'ok'},{msg:'[R53] Gradually increase v2 weight for canary rollout.',cls:'ok'}];rerender();}
+function r53Restore(){r53Records[0].health='healthy';buildLog=[{msg:'[R53] Health check PASS: pizza.com restored.',cls:'ok'}];rerender();}
+
+/* ─── ELB ─── */
+function rElb(){
+  let s=header('Elastic Load Balancer — The Host at the Door',
+    'ALB (Layer 7 path/host routing), NLB (Layer 4 TCP/UDP), GWLB (inline appliances).',
+    'ALB + ECS/EKS blue/green via CodeDeploy: #1 exam deployment pattern for containers');
+  s+=metaphor('500 customers arrive at once. The host (ELB) counts who\'s at each table and sends new arrivals to the least-busy section. If a waiter collapses (unhealthy instance), the host stops sending customers there immediately and redistributes.');
+  s+=`<div class="sim-area">
+  ${elbTargets.map(t=>`<div class="order-item"><code style="font-size:12px;min-width:70px">${t.id}</code><span class="tag">${t.zone}</span><span class="pill ${t.health==='healthy'?'pill-green':'pill-red'}">${t.health}</span><div class="progress-bar" style="margin:0 8px"><div class="progress-fill" style="width:${Math.min(100,t.req/2)}%;background:#185FA5"></div></div><span style="font-size:12px;color:var(--color-text-tertiary)">${t.req} req/s</span></div>`).join('')}
+  <div class="btn-row" style="margin-top:8px">
+    <button class="btn btn-primary" onclick="elbTraffic()">Send 200 requests</button>
+    <button class="btn btn-danger" onclick="elbKill()">Fail one target</button>
+    <button class="btn btn-gray" onclick="elbHeal()">Restore</button>
+  </div><div class="log" style="margin-top:8px">${logHtml()}</div></div>
+  <div class="sim-area"><div class="sim-title">ALB vs NLB vs GWLB</div>
+  <div class="info-grid">
+    <div class="info-card"><div class="info-card-title">ALB (Layer 7)</div><div class="info-card-body">Path-based routing: /pizza → pizza-svc, /drinks → drinks-svc. Best for HTTP microservices.</div></div>
+    <div class="info-card"><div class="info-card-title">NLB (Layer 4)</div><div class="info-card-body">Ultra-low latency, static IP, TCP/UDP. Best for gaming, VoIP, real-time apps.</div></div>
+    <div class="info-card"><div class="info-card-title">GWLB (Layer 3)</div><div class="info-card-body">Routes traffic through 3rd-party firewalls/inspection appliances transparently.</div></div>
+    <div class="info-card"><div class="info-card-title">Sticky sessions</div><div class="info-card-body">ALB can pin a user to the same instance using cookies — stateful apps exam scenario.</div></div>
+  </div></div>`;
+  return s;
+}
+function elbTraffic(){const h=elbTargets.filter(t=>t.health==='healthy').length;elbTargets.forEach(t=>{if(t.health==='healthy')t.req+=Math.floor(200/h);});buildLog=[{msg:`[ELB] 200 requests distributed across ${h} healthy targets.`,cls:'ok'},{msg:`[ELB] Algorithm: round-robin. ${Math.floor(200/h)} req each.`,cls:'ok'}];rerender();}
+function elbKill(){elbTargets[0].health='unhealthy';buildLog=[{msg:'[ELB] Health check FAIL: '+elbTargets[0].id,cls:'err'},{msg:'[ELB] Deregistering from target group.',cls:'warn'},{msg:'[ELB] Traffic redistributed to 2 healthy targets.',cls:'ok'}];rerender();}
+function elbHeal(){elbTargets.forEach(t=>{t.health='healthy';t.req=130+Math.floor(Math.random()*40);});buildLog=[{msg:'[ELB] All 3 targets healthy. Restored.',cls:'ok'}];rerender();}
+
+/* ─── SQS ─── */
+function rSqs(){
+  let s=header('SQS — The Order Ticket Rail',
+    'Standard (at-least-once) and FIFO (exactly-once, ordered) queues. DLQ, visibility timeout.',
+    'Long polling (ReceiveMessage WaitTimeSeconds=20): reduces empty responses and cost');
+  s+=metaphor('Orders don\'t go straight to the chef\'s hand — they clip onto the ticket rail (SQS). The chef takes the next ticket when ready. If the kitchen gets slammed, orders queue safely on the rail rather than being lost. Failed orders (poisoned tickets) go to a special bin (DLQ) for investigation.');
+  s+=`<div class="sim-area">
+  <div class="metric-row">
+    <div class="metric"><div class="metric-val">${sqsQueue.length}</div><div class="metric-lbl">In queue</div></div>
+    <div class="metric"><div class="metric-val">${sqsMsgCount}</div><div class="metric-lbl">Total sent</div></div>
+  </div>
+  <div style="max-height:110px;overflow-y:auto;margin-bottom:8px">
+    ${sqsQueue.slice(0,5).map(m=>`<div class="order-item"><span class="pill pill-blue">queued</span><div style="flex:1;font-size:13px">${m.msg}</div><span style="font-size:11px;color:var(--color-text-tertiary)">vis: ${m.vis}s</span></div>`).join('')||'<div style="font-size:13px;color:var(--color-text-tertiary);padding:6px">Queue empty.</div>'}
+  </div>
+  <div class="btn-row">
+    <button class="btn btn-primary" onclick="sqsSend()">Send 3 orders to queue</button>
+    <button class="btn btn-success" onclick="sqsProcess()">Process next ticket</button>
+    <button class="btn btn-danger" onclick="sqsDLQ()">Poison message → DLQ</button>
+  </div><div class="log" style="margin-top:8px">${logHtml()}</div></div>`;
+  return s;
+}
+function sqsSend(){const pizzas=['Margherita','Pepperoni','BBQ'];for(let i=0;i<3;i++){sqsMsgCount++;sqsQueue.unshift({msg:'ProcessOrder #'+sqsMsgCount+' ('+pizzas[i]+')',vis:30});}buildLog=[{msg:'[SQS] 3 messages sent. Queue depth: '+sqsQueue.length,cls:'ok'}];rerender();}
+function sqsProcess(){if(sqsQueue.length>0){const m=sqsQueue.pop();buildLog=[{msg:'[SQS] Received: '+m.msg,cls:'info'},{msg:'[SQS] Processing... done.',cls:'ok'},{msg:'[SQS] DeleteMessage called. Queue depth: '+sqsQueue.length,cls:'ok'}];}else{buildLog=[{msg:'[SQS] Queue is empty.',cls:'warn'}];}rerender();}
+function sqsDLQ(){buildLog=[{msg:'[SQS] Message failed 3 retries (maxReceiveCount=3)',cls:'err'},{msg:'[SQS] Moving to Dead Letter Queue: pizza-orders-dlq',cls:'warn'},{msg:'[SQS] CloudWatch alarm: DLQ depth > 0 → SNS alert sent',cls:'ok'},{msg:'[SQS] Investigate DLQ to find root cause.',cls:'info'}];rerender();}
+
+/* ─── SNS ─── */
+function rSns(){
+  let s=header('SNS — The Announcement Speaker',
+    'Pub/Sub: one message fans out to email, SMS, SQS, Lambda, HTTP endpoints.',
+    'Message filtering: subscribers only receive messages matching their attribute filter');
+  s+=metaphor('The manager grabs the mic (SNS) and announces "Big order incoming!" — simultaneously the oven team, prep station, packaging, and billing all hear it. One announcement, many listeners. You can also filter: the oven team only hears pizza orders, not drink orders.');
+  s+=`<div class="sim-area">
+  ${snsTopics.map(t=>`<div class="order-item" style="flex-direction:column;align-items:flex-start;gap:4px"><div style="font-weight:500;font-size:13px">Topic: ${t.name}</div><div class="tag-row">${t.subs.map(s=>`<span class="tag">${s}</span>`).join('')}</div></div>`).join('')}
+  <div class="btn-row" style="margin-top:8px">
+    <button class="btn btn-primary" onclick="snsPublish('order-alerts','New order: 50x Margherita catering')">Publish to order-alerts</button>
+    <button class="btn btn-amber" onclick="snsPublish('low-stock-alerts','Cheese below 10kg')">Publish low-stock alert</button>
+    <button class="btn btn-purple" onclick="snsFanout()">SNS → SQS fan-out pattern</button>
+  </div><div class="log" style="margin-top:8px">${logHtml()}</div></div>`;
+  return s;
+}
+function snsPublish(topic,msg){const t=snsTopics.find(x=>x.name===topic);buildLog=[{msg:`[SNS] Publishing to topic: ${topic}`,cls:'info'},...(t?t.subs.map(s=>({msg:`[SNS] → Delivered to: ${s}`,cls:'ok'})):[]),{msg:`[SNS] Message: "${msg}"`,cls:'ok'}];rerender();}
+function snsFanout(){buildLog=[{msg:'[SNS] order-alerts topic triggered.',cls:'info'},{msg:'[SNS] → SQS: kitchen-queue (chefs pull when ready)',cls:'ok'},{msg:'[SNS] → SQS: billing-queue (accounting system)',cls:'ok'},{msg:'[SNS] → SQS: analytics-queue (reporting)',cls:'ok'},{msg:'[SNS] Fan-out: 3 independent consumers, decoupled.',cls:'ok'}];rerender();}
+
+/* ─── S3 ─── */
+function rS3(){
+  let s=header('S3 — The Walk-In Storage Room',
+    'Object storage. Versioning, lifecycle policies, event notifications, replication.',
+    'S3 event notifications → SQS/SNS/Lambda: triggers CodePipeline on artifact upload');
+  s+=metaphor('S3 is the walk-in storage room. Build artifacts, recipe books, security camera footage (logs), and every old recipe version live here. Nothing expires unless you set a rule. Versioning means you can get Tuesday\'s recipe back even if someone overwrote it today.');
+  s+=`<div class="sim-area">
+  ${s3Buckets.map(b=>`<div class="order-item"><div style="flex:1"><div style="font-weight:500">${b.name}</div><div style="font-size:12px;color:var(--color-text-tertiary)">${b.objects.toLocaleString()} objects · ${b.size}</div></div></div>`).join('')}
+  <div class="btn-row" style="margin-top:8px">
+    <button class="btn btn-primary" onclick="s3Upload()">Upload build artifact</button>
+    <button class="btn btn-teal" onclick="s3Version()">Enable versioning</button>
+    <button class="btn btn-amber" onclick="s3Lifecycle()">Set lifecycle policy</button>
+    <button class="btn btn-danger" onclick="s3Delete()">Delete (versioning protects it)</button>
+  </div><div class="log" style="margin-top:8px">${logHtml()}</div></div>`;
+  return s;
+}
+function s3Upload(){s3Buckets[0].objects++;buildLog=[{msg:'[S3] Uploading margherita-v1.3.zip...',cls:'info'},{msg:'[S3] Stored: s3://pizza-artifacts/builds/v1.3.zip',cls:'ok'},{msg:'[S3] Event notification → CodePipeline triggered!',cls:'ok'}];rerender();}
+function s3Version(){buildLog=[{msg:'[S3] Versioning ENABLED on pizza-artifacts.',cls:'ok'},{msg:'[S3] Every upload now stores a new version ID.',cls:'ok'},{msg:'[S3] Old versions kept until lifecycle rule expires them.',cls:'ok'}];rerender();}
+function s3Lifecycle(){buildLog=[{msg:'[S3] Lifecycle rule on pizza-logs:',cls:'info'},{msg:'[S3] Day 0-30: S3 Standard',cls:'ok'},{msg:'[S3] Day 31-90: S3 Infrequent Access (cheaper)',cls:'ok'},{msg:'[S3] Day 91+: Glacier Instant Retrieval (archive)',cls:'ok'}];rerender();}
+function s3Delete(){buildLog=[{msg:'[S3] Delete: recipe-v1.2.zip',cls:'warn'},{msg:'[S3] Versioning ON — delete marker created.',cls:'ok'},{msg:'[S3] Object still retrievable via version ID.',cls:'ok'}];rerender();}
+
+show('pipeline');
+</script>
+
+</body>
+</html>
